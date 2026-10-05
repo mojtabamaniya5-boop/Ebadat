@@ -1,10 +1,5 @@
-// ایمپورت امن
 let adhan
-try {
-  adhan = require('adhan')
-} catch (e) {
-  adhan = null
-}
+try { adhan = require('adhan') } catch (e) { adhan = null }
 
 export const cities = [
   { name: 'تهران', lat: 35.6892, lng: 51.3890 },
@@ -51,27 +46,20 @@ export const saveCity = (city) => {
   localStorage.setItem('ebadat-city', JSON.stringify(city))
 }
 
-// محاسبه اوقات شرعی - با کنترل خطا
 export const calculatePrayerTimes = (city, date = new Date()) => {
-  if (!adhan) {
-    console.warn('adhan library not loaded')
-    return null
-  }
+  if (!adhan) return null
   try {
     const coordinates = new adhan.Coordinates(city.lat, city.lng)
     const params = adhan.CalculationMethod.Tehran()
-    // اگه Madhab.Jafari نبود، از پیش‌فرض استفاده کن
-    if (adhan.Madhab && adhan.Madhab.Jafari) {
-      params.madhab = adhan.Madhab.Jafari
-    }
-    const prayerTimes = new adhan.PrayerTimes(coordinates, date, params)
+    if (adhan.Madhab && adhan.Madhab.Jafari) params.madhab = adhan.Madhab.Jafari
+    const pt = new adhan.PrayerTimes(coordinates, date, params)
     return {
-      fajr: prayerTimes.fajr,
-      sunrise: prayerTimes.sunrise,
-      dhuhr: prayerTimes.dhuhr,
-      asr: prayerTimes.asr,
-      maghrib: prayerTimes.maghrib,
-      isha: prayerTimes.isha,
+      fajr: pt.fajr,
+      sunrise: pt.sunrise,
+      dhuhr: pt.dhuhr,
+      asr: pt.asr,
+      maghrib: pt.maghrib,
+      isha: pt.isha,
     }
   } catch (e) {
     console.error('Prayer times error:', e)
@@ -79,16 +67,14 @@ export const calculatePrayerTimes = (city, date = new Date()) => {
   }
 }
 
+// فقط ۳ اذان شیعه
 export const getNextPrayer = (times) => {
   if (!times) return null
   const now = new Date()
   const order = [
     { key: 'fajr', name: 'اذان صبح', icon: '🌅' },
-    { key: 'sunrise', name: 'طلوع آفتاب', icon: '☀️' },
     { key: 'dhuhr', name: 'اذان ظهر', icon: '🌞' },
-    { key: 'asr', name: 'اذان عصر', icon: '🌤️' },
     { key: 'maghrib', name: 'اذان مغرب', icon: '🌆' },
-    { key: 'isha', name: 'اذان عشا', icon: '🌙' },
   ]
   for (const p of order) {
     if (times[p.key] && times[p.key] > now) return { ...p, time: times[p.key] }
@@ -96,11 +82,22 @@ export const getNextPrayer = (times) => {
   return null
 }
 
+// لیست کامل اوقات (برای صفحه تنظیمات یا نمایش جزئیات)
+export const getAllTimes = (times) => {
+  if (!times) return []
+  return [
+    { name: 'اذان صبح', time: times.fajr, icon: '🌅' },
+    { name: 'طلوع آفتاب', time: times.sunrise, icon: '☀️' },
+    { name: 'اذان ظهر', time: times.dhuhr, icon: '🌞' },
+    { name: 'نماز عصر', time: times.asr, icon: '🌤️' },
+    { name: 'اذان مغرب', time: times.maghrib, icon: '🌆' },
+    { name: 'نماز عشا', time: times.isha, icon: '🌙' },
+  ]
+}
+
 export const formatTime = (date) => {
   if (!date) return '--:--'
-  const h = String(date.getHours()).padStart(2, '0')
-  const m = String(date.getMinutes()).padStart(2, '0')
-  return `${h}:${m}`
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
 export const getCountdown = (targetTime) => {
@@ -108,8 +105,9 @@ export const getCountdown = (targetTime) => {
   const now = new Date()
   let diff = targetTime - now
   if (diff < 0) diff += 24 * 60 * 60 * 1000
-  const h = Math.floor(diff / (1000 * 60 * 60))
-  const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-  const s = Math.floor((diff % (1000 * 60)) / 1000)
-  return { h, m, s }
+  return {
+    h: Math.floor(diff / (1000 * 60 * 60)),
+    m: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+    s: Math.floor((diff % (1000 * 60)) / 1000),
+  }
 }
