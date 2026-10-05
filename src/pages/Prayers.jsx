@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Sparkles, Heart, RefreshCw, ChevronDown, BookOpen, Star } from 'lucide-react'
+import { Sparkles, Heart, RefreshCw, ChevronDown, BookOpen, Star, Copy, Check } from 'lucide-react'
+import { prayersData } from '../data/prayers'
 
 const zikrList = [
   { id: 'salawat', name: 'صلوات', target: 100, emoji: '💚', color: 'rose' },
@@ -10,18 +11,8 @@ const zikrList = [
   { id: 'faraj', name: 'دعای فرج', target: 10, emoji: '✨', color: 'amber' },
 ]
 
-const prayersList = [
-  { id: 'komail', name: 'دعای کمیل', time: 'شب جمعه', color: 'emerald' },
-  { id: 'tavasol', name: 'دعای توسل', time: 'شب سه‌شنبه', color: 'sky' },
-  { id: 'nudbe', name: 'دعای ندبه', time: 'صبح جمعه', color: 'amber' },
-  { id: 'ashura', name: 'زیارت عاشورا', time: 'هر روز', color: 'rose' },
-  { id: 'ahd', name: 'دعای عهد', time: 'صبح‌ها', color: 'purple' },
-  { id: 'yasin', name: 'آل یاسین', time: 'هر روز', color: 'cyan' },
-]
-
 function ZikrCard({ zikr }) {
   const [count, setCount] = useState(0)
-  const [showTarget, setShowTarget] = useState(false)
 
   const progress = Math.min((count / zikr.target) * 100, 100)
   const isComplete = count >= zikr.target
@@ -36,20 +27,20 @@ function ZikrCard({ zikr }) {
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-700 mb-3 transition-colors">
+    <div className="bg-white dark:bg-dark-surface rounded-2xl p-4 shadow-soft border border-light-border dark:border-dark-border mb-3 transition-colors">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="text-2xl">{zikr.emoji}</span>
           <div>
-            <p className="font-bold text-gray-800 dark:text-gray-100 text-sm">{zikr.name}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">هدف: {zikr.target}</p>
+            <p className="font-bold text-main text-sm">{zikr.name}</p>
+            <p className="text-xs text-sub">هدف: {zikr.target}</p>
           </div>
         </div>
         <button
-          onClick={() => { setCount(0) }}
-          className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center"
+          onClick={() => setCount(0)}
+          className="w-8 h-8 rounded-full bg-light-bg dark:bg-dark-bg flex items-center justify-center"
         >
-          <RefreshCw size={14} className="text-gray-500 dark:text-gray-300" />
+          <RefreshCw size={14} className="text-sub" />
         </button>
       </div>
 
@@ -67,8 +58,8 @@ function ZikrCard({ zikr }) {
           >
             +۱۰
           </button>
-          <div className="bg-gray-100 dark:bg-slate-700 rounded-xl px-4 py-3 min-w-[60px] text-center">
-            <p className="font-bold text-gray-800 dark:text-gray-100">{count}</p>
+          <div className="bg-light-bg dark:bg-dark-bg rounded-xl px-4 py-3 min-w-[60px] text-center">
+            <p className="font-bold text-main">{count}</p>
           </div>
         </div>
       ) : (
@@ -79,7 +70,7 @@ function ZikrCard({ zikr }) {
       )}
 
       {!isComplete && count > 0 && (
-        <div className="mt-3 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
+        <div className="mt-3 h-1.5 bg-light-bg dark:bg-dark-bg rounded-full overflow-hidden">
           <div
             className={`h-full bg-gradient-to-l ${colorMap[zikr.color]} transition-all duration-500`}
             style={{ width: `${progress}%` }}
@@ -92,6 +83,8 @@ function ZikrCard({ zikr }) {
 
 function PrayerItem({ prayer }) {
   const [open, setOpen] = useState(false)
+  const [copiedIdx, setCopiedIdx] = useState(null)
+
   const colorMap = {
     emerald: 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300',
     sky: 'bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300',
@@ -101,8 +94,14 @@ function PrayerItem({ prayer }) {
     cyan: 'bg-cyan-50 dark:bg-cyan-950 text-cyan-700 dark:text-cyan-300',
   }
 
+  const copyText = (text, idx) => {
+    navigator.clipboard.writeText(text)
+    setCopiedIdx(idx)
+    setTimeout(() => setCopiedIdx(null), 1500)
+  }
+
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 mb-3 overflow-hidden transition-colors">
+    <div className="bg-white dark:bg-dark-surface rounded-2xl shadow-soft border border-light-border dark:border-dark-border mb-3 overflow-hidden transition-colors">
       <button
         onClick={() => setOpen(!open)}
         className="w-full p-4 flex items-center justify-between text-right"
@@ -112,20 +111,35 @@ function PrayerItem({ prayer }) {
             <BookOpen size={18} />
           </div>
           <div>
-            <p className="font-bold text-gray-800 dark:text-gray-100 text-sm">{prayer.name}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{prayer.time}</p>
+            <p className="font-bold text-main text-sm">{prayer.name}</p>
+            <p className="text-xs text-sub">{prayer.time}</p>
           </div>
         </div>
         <ChevronDown
           size={20}
-          className={`text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`text-sub transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-slate-700">
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-            متن کامل این دعا به زودی در این بخش قرار می‌گیرد. در حال حاضر می‌توانید با نیت خالص آن را از روی مفاتیح‌الجنان یا اپلیکیشن‌های مذهبی بخوانید. 🌱
-          </p>
+        <div className="px-4 pb-4 border-t border-light-border dark:border-dark-border">
+          {prayer.sections.map((section, idx) => (
+            <div key={idx} className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-bold text-brand-600 dark:text-brand-400 text-xs">
+                  ● {section.title}
+                </h4>
+                <button
+                  onClick={() => copyText(section.text, idx)}
+                  className="flex items-center gap-1 text-[10px] text-sub bg-light-bg dark:bg-dark-bg px-2 py-1 rounded-lg"
+                >
+                  {copiedIdx === idx ? <><Check size={10} /> کپی شد</> : <><Copy size={10} /> کپی</>}
+                </button>
+              </div>
+              <p className="text-sm text-main leading-loose text-justify bg-light-bg dark:bg-dark-bg p-3 rounded-xl" dir="rtl" style={{ fontFamily: 'Vazirmatn, serif' }}>
+                {section.text}
+              </p>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -138,21 +152,20 @@ export default function Prayers() {
   return (
     <main className="p-4 max-w-md mx-auto pb-24 animate-fade-in">
       <div className="text-center mt-6 mb-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-l from-emerald-500 to-teal-600 rounded-2xl shadow-lg mb-3">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-l from-emerald-500 to-teal-600 rounded-2xl shadow-glow-sm mb-3">
           <Heart className="text-white" size={28} />
         </div>
-        <h1 className="text-2xl font-bold text-emerald-800 dark:text-emerald-300">دعا و اذکار</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">قلبت را با یاد او روشن کن</p>
+        <h1 className="text-2xl font-bold text-brand-600 dark:text-brand-400">دعا و اذکار</h1>
+        <p className="text-sm text-sub mt-1">قلبت را با یاد او روشن کن</p>
       </div>
 
-      {/* تب‌ها */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-1.5 flex gap-1.5 mb-6 shadow-sm border border-gray-100 dark:border-slate-700">
+      <div className="bg-white dark:bg-dark-surface rounded-2xl p-1.5 flex gap-1.5 mb-6 shadow-soft border border-light-border dark:border-dark-border">
         <button
           onClick={() => setTab('zikr')}
           className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all ${
             tab === 'zikr'
-              ? 'bg-gradient-to-l from-emerald-500 to-teal-600 text-white shadow-md'
-              : 'text-gray-600 dark:text-gray-300'
+              ? 'bg-gradient-to-l from-emerald-500 to-teal-600 text-white shadow-glow-sm'
+              : 'text-sub'
           }`}
         >
           📿 اذکار
@@ -161,18 +174,17 @@ export default function Prayers() {
           onClick={() => setTab('prayers')}
           className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all ${
             tab === 'prayers'
-              ? 'bg-gradient-to-l from-emerald-500 to-teal-600 text-white shadow-md'
-              : 'text-gray-600 dark:text-gray-300'
+              ? 'bg-gradient-to-l from-emerald-500 to-teal-600 text-white shadow-glow-sm'
+              : 'text-sub'
           }`}
         >
-          🤲 ادعیه و زیارات
+          🤲 ادعیه
         </button>
       </div>
 
-      {/* محتوا */}
       {tab === 'zikr' ? (
         <div className="animate-fade-in">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 px-1 flex items-center gap-1">
+          <p className="text-xs text-sub mb-3 px-1 flex items-center gap-1">
             <Star size={12} />
             هدف را کامل کن تا پاداش بگیری
           </p>
@@ -180,11 +192,11 @@ export default function Prayers() {
         </div>
       ) : (
         <div className="animate-fade-in">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 px-1 flex items-center gap-1">
+          <p className="text-xs text-sub mb-3 px-1 flex items-center gap-1">
             <Star size={12} />
-            روی هر دعا بزن تا متن آن را ببینی
+            روی هر دعا بزن تا متن کامل باز شود
           </p>
-          {prayersList.map((p) => <PrayerItem key={p.id} prayer={p} />)}
+          {prayersData.map((p) => <PrayerItem key={p.id} prayer={p} />)}
         </div>
       )}
     </main>
