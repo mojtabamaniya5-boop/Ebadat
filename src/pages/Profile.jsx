@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import {
   User, Moon, Sun, Download, Upload, Trash2, Info,
   Heart, Award, Flame, BookOpen, CheckCircle2, AlertCircle,
-  ChevronLeft, Shield, X, Check
+  ChevronLeft, Shield, X, Check, Trophy, Sparkles
 } from 'lucide-react'
 import { getGlobalStats, exportAllData, importAllData, resetAllData } from '../utils/storage'
-import { calculateTotalXP, getTitle } from '../utils/achievements'
+import { calculateTotalXP, getTitle, getStreak } from '../utils/achievements'
 
 export default function Profile() {
   const [dark, setDark] = useState(false)
   const [stats, setStats] = useState(null)
+  const [xp, setXp] = useState(0)
+  const [title, setTitle] = useState(null)
+  const [streak, setStreak] = useState(0)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
   const [toast, setToast] = useState(null)
@@ -18,6 +22,10 @@ export default function Profile() {
   useEffect(() => {
     setDark(localStorage.getItem('ebadat-theme') === 'dark')
     setStats(getGlobalStats())
+    const x = calculateTotalXP()
+    setXp(x)
+    setTitle(getTitle(x))
+    setStreak(getStreak())
   }, [])
 
   const showToast = (msg, type = 'success') => {
@@ -98,8 +106,41 @@ export default function Profile() {
           </div>
         </div>
         <h1 className="text-2xl font-bold text-brand-600 dark:text-brand-400 mt-3">کاربر همراه</h1>
+        {title && (
+          <p className="text-sm text-sub mt-1 flex items-center justify-center gap-1">
+            <span>{title.emoji}</span>
+            <span className="font-bold">{title.name}</span>
+            <span className="text-xs">·</span>
+            <span className="text-xs">{xp.toLocaleString('fa-IR')} XP</span>
+          </p>
+        )}
         <p className="text-xs text-sub mt-1">نسخه ۱.۰.۰</p>
       </div>
+
+      {/* کارت دستاوردها */}
+      <Link to="/achievements" className="block mb-5 active:scale-[0.98] transition">
+        <div className={`relative overflow-hidden rounded-2xl p-5 bg-gradient-to-bl ${title?.color || 'from-brand-500 to-brand-700'} text-white shadow-glow-sm`}>
+          <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Trophy size={18} />
+                <span className="font-bold text-sm">دستاوردهای من</span>
+              </div>
+              <p className="text-2xl font-bold flex items-center gap-2">
+                <span>{title?.emoji}</span>
+                {title?.name}
+              </p>
+              <div className="flex items-center gap-3 mt-2 text-xs">
+                <span>🔥 {streak} روز پیوسته</span>
+                <span>·</span>
+                <span>💫 {xp.toLocaleString('fa-IR')} XP</span>
+              </div>
+            </div>
+            <ChevronLeft size={24} className="text-white/70" />
+          </div>
+        </div>
+      </Link>
 
       {/* کارت‌های آماری */}
       {stats && (
@@ -108,7 +149,7 @@ export default function Profile() {
             <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
               <Flame className="text-amber-500" size={20} />
             </div>
-            <p className="text-2xl font-bold text-main">{stats.streak}</p>
+            <p className="text-2xl font-bold text-main">{stats.streak || streak}</p>
             <p className="text-xs text-sub mt-1">روز پیوسته</p>
           </div>
           <div className="card p-4 text-center">
@@ -143,6 +184,10 @@ export default function Profile() {
             <span className="text-sm font-bold text-main">{stats.activeDays} روز</span>
           </div>
           <div className="flex items-center justify-between py-2 border-b border-light-border dark:border-dark-border">
+            <span className="text-sm text-sub">روزهای کامل (۵ نماز)</span>
+            <span className="text-sm font-bold text-brand-500">{stats.perfectDays || 0}</span>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-light-border dark:border-dark-border">
             <span className="text-sm text-sub">نمازهای قضا</span>
             <span className={`text-sm font-bold ${stats.totalQaza > 0 ? 'text-red-500' : 'text-brand-500'}`}>
               {stats.totalQaza}
@@ -161,10 +206,7 @@ export default function Profile() {
 
       {/* تم */}
       <div className="card overflow-hidden mb-4">
-        <button
-          onClick={toggleTheme}
-          className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition"
-        >
+        <button onClick={toggleTheme} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
               {dark ? <Moon className="text-amber-500" size={20} /> : <Sun className="text-amber-500" size={20} />}
@@ -180,14 +222,11 @@ export default function Profile() {
         </button>
       </div>
 
-      {/* بخش داده‌ها */}
+      {/* مدیریت داده */}
       <div className="mb-4">
         <p className="text-xs font-bold text-sub mb-2 px-1">مدیریت داده‌ها</p>
         <div className="card overflow-hidden">
-          <button
-            onClick={handleExport}
-            className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition border-b border-light-border dark:border-dark-border"
-          >
+          <button onClick={handleExport} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition border-b border-light-border dark:border-dark-border">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center">
                 <Download className="text-brand-500" size={20} />
@@ -200,33 +239,21 @@ export default function Profile() {
             <ChevronLeft className="text-sub" size={18} />
           </button>
 
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition border-b border-light-border dark:border-dark-border"
-          >
+          <button onClick={() => fileInputRef.current?.click()} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition border-b border-light-border dark:border-dark-border">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center">
                 <Upload className="text-sky-500" size={20} />
               </div>
               <div className="text-right">
                 <p className="font-bold text-main text-sm">بازیابی</p>
-                <p className="text-xs text-sub mt-0.5">بارگذاری از فایل پشتیبان</p>
+                <p className="text-xs text-sub mt-0.5">بارگذاری از فایل</p>
               </div>
             </div>
             <ChevronLeft className="text-sub" size={18} />
           </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleImport}
-            className="hidden"
-          />
+          <input ref={fileInputRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
 
-          <button
-            onClick={() => setShowResetConfirm(true)}
-            className="w-full p-4 flex items-center justify-between active:bg-red-50 dark:active:bg-red-900/20 transition"
-          >
+          <button onClick={() => setShowResetConfirm(true)} className="w-full p-4 flex items-center justify-between active:bg-red-50 dark:active:bg-red-900/20 transition">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
                 <Trash2 className="text-red-500" size={20} />
@@ -243,10 +270,7 @@ export default function Profile() {
 
       {/* درباره اپ */}
       <div className="card overflow-hidden mb-4">
-        <button
-          onClick={() => setShowAbout(true)}
-          className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition"
-        >
+        <button onClick={() => setShowAbout(true)} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
               <Info className="text-purple-500" size={20} />
@@ -260,7 +284,6 @@ export default function Profile() {
         </button>
       </div>
 
-      {/* پانویس */}
       <p className="text-center text-xs text-sub mt-8 flex items-center justify-center gap-1">
         ساخته شده با <Heart size={12} className="text-rose-500" fill="currentColor" /> در ایران
       </p>
@@ -277,16 +300,10 @@ export default function Profile() {
               همه داده‌هایت (نمازها، قرآن، صلوات، چالش‌ها) حذف می‌شود. این عملیات <strong className="text-red-500">غیرقابل بازگشت</strong> است.
             </p>
             <div className="flex gap-2">
-              <button
-                onClick={() => setShowResetConfirm(false)}
-                className="flex-1 py-3 rounded-xl bg-light-bg dark:bg-dark-bg text-main font-bold text-sm active:scale-95 transition"
-              >
+              <button onClick={() => setShowResetConfirm(false)} className="flex-1 py-3 rounded-xl bg-light-bg dark:bg-dark-bg text-main font-bold text-sm active:scale-95 transition">
                 انصراف
               </button>
-              <button
-                onClick={handleReset}
-                className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-sm active:scale-95 transition shadow-md"
-              >
+              <button onClick={handleReset} className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold text-sm active:scale-95 transition shadow-md">
                 حذف کن
               </button>
             </div>
