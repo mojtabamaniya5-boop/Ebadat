@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Calendar, CheckCircle2, Sparkles, ChevronLeft } from 'lucide-react'
 import { getTodayData, saveTodayData } from '../utils/storage'
 import ThemeToggle from '../components/ThemeToggle'
+import PrayerTimesCard from '../components/PrayerTimesCard'
 
 export default function Dashboard() {
   const [data, setData] = useState(null)
@@ -59,6 +60,8 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      <PrayerTimesCard />
 
       {/* خلاصه */}
       <div className="card p-5 mb-6">

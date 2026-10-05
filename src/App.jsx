@@ -8,13 +8,15 @@ import Coach from './pages/Coach'
 import Calendar from './pages/Calendar'
 import Analytics from './pages/Analytics'
 import Profile from './pages/Profile'
+import PrayerSettings from './pages/PrayerSettings'
 
 function AppContent() {
   const location = useLocation()
   const isCoach = location.pathname === '/coach'
+  const isSettings = location.pathname === '/prayer-settings'
 
   return (
-    <div className={`min-h-screen ${isCoach ? '' : 'pb-20'} bg-light-bg dark:bg-dark-bg transition-colors duration-300`} dir="rtl">
+    <div className={`min-h-screen ${isCoach || isSettings ? '' : 'pb-20'} bg-light-bg dark:bg-dark-bg transition-colors duration-300`} dir="rtl">
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/track" element={<Track />} />
@@ -23,6 +25,7 @@ function AppContent() {
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/prayer-settings" element={<PrayerSettings />} />
       </Routes>
       <BottomNav />
     </div>

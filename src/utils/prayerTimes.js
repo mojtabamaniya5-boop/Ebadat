@@ -1,0 +1,102 @@
+import * as adhan from 'adhan'
+
+// شهرهای اصلی ایران با مختصات
+export const cities = [
+  { name: 'تهران', lat: 35.6892, lng: 51.3890 },
+  { name: 'مشهد', lat: 36.2605, lng: 59.6168 },
+  { name: 'اصفهان', lat: 32.6546, lng: 51.6680 },
+  { name: 'شیراز', lat: 29.5918, lng: 52.5837 },
+  { name: 'تبریز', lat: 38.0800, lng: 46.2919 },
+  { name: 'کرج', lat: 35.8400, lng: 50.9391 },
+  { name: 'اهواز', lat: 31.3183, lng: 48.6706 },
+  { name: 'قم', lat: 34.6416, lng: 50.8746 },
+  { name: 'کرمانشاه', lat: 34.3142, lng: 47.0650 },
+  { name: 'ارومیه', lat: 37.5527, lng: 45.0761 },
+  { name: 'زاهدان', lat: 29.4963, lng: 60.8629 },
+  { name: 'رشت', lat: 37.2808, lng: 49.5832 },
+  { name: 'زنجان', lat: 36.6769, lng: 48.4963 },
+  { name: 'یزد', lat: 31.8974, lng: 54.3569 },
+  { name: 'اردبیل', lat: 38.2498, lng: 48.2933 },
+  { name: 'بندرعباس', lat: 27.1832, lng: 56.2666 },
+  { name: 'اراک', lat: 34.0917, lng: 49.6892 },
+  { name: 'اسلامشهر', lat: 35.5628, lng: 51.2368 },
+  { name: 'بوشهر', lat: 28.9234, lng: 50.8200 },
+  { name: 'قزوین', lat: 36.2670, lng: 50.0040 },
+  { name: 'خرم‌آباد', lat: 33.4878, lng: 48.3558 },
+  { name: 'گرگان', lat: 36.8456, lng: 54.4393 },
+  { name: 'ساری', lat: 36.5633, lng: 53.0601 },
+  { name: 'سنندج', lat: 35.3147, lng: 46.9988 },
+  { name: 'بیرجند', lat: 32.8660, lng: 59.2211 },
+  { name: 'کرمان', lat: 30.2839, lng: 57.0834 },
+  { name: 'همدان', lat: 34.7983, lng: 48.5147 },
+  { name: 'یاسوج', lat: 30.6682, lng: 51.5880 },
+  { name: 'ایلام', lat: 33.6374, lng: 46.4226 },
+  { name: 'سمنان', lat: 35.5729, lng: 53.3971 },
+]
+
+export const getSavedCity = () => {
+  try {
+    const saved = localStorage.getItem('ebadat-city')
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return cities[0] // پیش‌فرض: تهران
+}
+
+export const saveCity = (city) => {
+  localStorage.setItem('ebadat-city', JSON.stringify(city))
+}
+
+// محاسبه اوقات شرعی
+export const calculatePrayerTimes = (city, date = new Date()) => {
+  const coordinates = new adhan.Coordinates(city.lat, city.lng)
+  const params = adhan.CalculationMethod.Tehran()
+  params.madhab = adhan.Madhab.Jafari
+
+  const prayerTimes = new adhan.PrayerTimes(coordinates, date, params)
+
+  return {
+    fajr: prayerTimes.fajr,
+    sunrise: prayerTimes.sunrise,
+    dhuhr: prayerTimes.dhuhr,
+    asr: prayerTimes.asr,
+    maghrib: prayerTimes.maghrib,
+    isha: prayerTimes.isha,
+  }
+}
+
+// پیدا کردن نماز بعدی
+export const getNextPrayer = (times) => {
+  const now = new Date()
+  const order = [
+    { key: 'fajr', name: 'اذان صبح', icon: '🌅' },
+    { key: 'sunrise', name: 'طلوع آفتاب', icon: '☀️' },
+    { key: 'dhuhr', name: 'اذان ظهر', icon: '🌞' },
+    { key: 'asr', name: 'اذان عصر', icon: '🌤️' },
+    { key: 'maghrib', name: 'اذان مغرب', icon: '🌆' },
+    { key: 'isha', name: 'اذان عشا', icon: '🌙' },
+  ]
+
+  for (const p of order) {
+    if (times[p.key] > now) return { ...p, time: times[p.key] }
+  }
+  return { ...order[0], time: times[order[0].key], tomorrow: true }
+}
+
+// فرمت زمان به فارسی
+export const formatTime = (date) => {
+  if (!date) return '--:--'
+  const h = String(date.getHours()).padStart(2, '0')
+  const m = String(date.getMinutes()).padStart(2, '0')
+  return `${h}:${m}`
+}
+
+// شمارش معکوس
+export const getCountdown = (targetTime) => {
+  const now = new Date()
+  let diff = targetTime - now
+  if (diff < 0) diff += 24 * 60 * 60 * 1000
+  const h = Math.floor(diff / (1000 * 60 * 60))
+  const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  const s = Math.floor((diff % (1000 * 60)) / 1000)
+  return { h, m, s }
+}
