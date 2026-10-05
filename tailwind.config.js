@@ -46,10 +46,15 @@ export default {
         'fade-in': 'fadeIn 0.4s ease-out',
         'slide-up': 'slideUp 0.35s ease-out',
         'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+        'sway': 'sway 3s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
         slideUp: { '0%': { transform: 'translateY(12px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
+        sway: {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
+        },
         pulseGlow: {
           '0%, 100%': { boxShadow: '0 0 12px rgba(20, 184, 166, 0.25)' },
           '50%': { boxShadow: '0 0 24px rgba(20, 184, 166, 0.5)' },

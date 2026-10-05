@@ -4,6 +4,7 @@ import { Calendar, CheckCircle2, Sparkles, ChevronLeft } from 'lucide-react'
 import { getTodayData, saveTodayData } from '../utils/storage'
 import ThemeToggle from '../components/ThemeToggle'
 import PrayerTimesCard from '../components/PrayerTimesCard'
+import SpiritualGarden from '../components/SpiritualGarden'
 
 export default function Dashboard() {
   const [data, setData] = useState(null)
@@ -102,15 +103,9 @@ export default function Dashboard() {
         </div>
       </Link>
 
-      {/* باغ معنوی */}
-      <div className="card p-5">
-        <h3 className="font-bold text-main mb-3 text-sm">باغ معنوی شما 🌱</h3>
-        <div className="h-32 rounded-xl flex items-center justify-center border-2 border-dashed border-brand-200 dark:border-brand-900/50 bg-gradient-to-b from-brand-50/50 to-transparent dark:from-brand-900/10">
-          <p className="text-brand-600 dark:text-brand-400 text-sm font-medium">
-            {totalPrayers >= 5 ? '🌟 باغ تو شکوفه داده!' : totalPrayers > 0 ? '🌿 باغت در حال رشد...' : '🌱 باغت منتظر توئه...'}
-          </p>
-        </div>
-      </div>
+
+      {/* باغ معنوی جدید */}
+      <SpiritualGarden />
     </main>
   )
 }
