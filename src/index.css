@@ -4,4 +4,16 @@
 
 body {
   font-family: 'Vazirmatn', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+
+body {
+  @apply bg-gray-50 text-gray-900 transition-colors duration-300;
+}
+.dark body {
+  @apply bg-slate-900 text-gray-100;
 }
