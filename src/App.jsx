@@ -10,11 +10,10 @@ import Calendar from './pages/Calendar'
 import Analytics from './pages/Analytics'
 import Profile from './pages/Profile'
 import PrayerSettings from './pages/PrayerSettings'
-import AdhanSettings from './pages/AdhanSettings'
 
 function AppContent() {
   const location = useLocation()
-  const hideNav = ['/coach', '/prayer-settings', '/adhan-settings'].includes(location.pathname)
+  const hideNav = ['/coach', '/prayer-settings'].includes(location.pathname)
 
   return (
     <div className={`min-h-screen ${hideNav ? '' : 'pb-20'} bg-light-bg dark:bg-dark-bg transition-colors duration-300`} dir="rtl">
@@ -28,7 +27,6 @@ function AppContent() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/prayer-settings" element={<PrayerSettings />} />
-        <Route path="/adhan-settings" element={<AdhanSettings />} />
       </Routes>
       <BottomNav />
     </div>
@@ -39,7 +37,6 @@ export default function App() {
   useEffect(() => {
     const saved = localStorage.getItem('ebadat-theme')
     if (saved === 'dark') document.documentElement.classList.add('dark')
-
     let lastDay = new Date().toDateString()
     const interval = setInterval(() => {
       const now = new Date().toDateString()
@@ -47,6 +44,5 @@ export default function App() {
     }, 60000)
     return () => clearInterval(interval)
   }, [])
-
   return <AppContent />
 }
