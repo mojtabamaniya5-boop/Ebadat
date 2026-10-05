@@ -1,20 +1,26 @@
 import { useEffect, useRef } from 'react'
 import { getSavedCity, calculatePrayerTimes } from '../utils/prayerTimes'
 
-const ADHAN_SOUNDS = {
-  default: 'https://cdn.islamic.network/adhans/128/ahmad-nafees.mp3',
-  short: 'https://cdn.islamic.network/adhans/128/mishary-alafasy.mp3',
-}
+const ADHAN_SRC = '/Ebadat/sounds/adhan.mp3'
 
 export default function AdhanPlayer() {
   const lastPlayedRef = useRef({})
   const audioRef = useRef(null)
 
   useEffect(() => {
-    const settings = JSON.parse(localStorage.getItem('ebadat-adhan') || '{}')
-    if (!settings.enabled) return
+    const audio = new Audio(ADHAN_SRC)
+    audio.preload = 'auto'
+    audioRef.current = audio
+
+    const getSettings = () => {
+      try { return JSON.parse(localStorage.getItem('ebadat-adhan') || '{}') }
+      catch { return {} }
+    }
 
     const interval = setInterval(() => {
+      const settings = getSettings()
+      if (!settings.enabled) return
+
       try {
         const city = getSavedCity()
         const times = calculatePrayerTimes(city)
@@ -22,7 +28,6 @@ export default function AdhanPlayer() {
 
         const now = new Date()
         const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()
-
         const adhans = [
           { key: 'fajr', time: times.fajr },
           { key: 'dhuhr', time: times.dhuhr },
@@ -31,40 +36,35 @@ export default function AdhanPlayer() {
 
         adhans.forEach(({ key, time }) => {
           if (!settings.perAdhan?.[key]) return
+          if (!time) return
           const t = time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds()
           const diff = Math.abs(currentSeconds - t)
           const today = new Date().toDateString()
           const lastKey = `${key}-${today}`
 
-          // اگه توی ۱۰ ثانیه اول اذان باشیم و قبلاً پخش نشده باشه
           if (diff < 5 && lastPlayedRef.current[lastKey] !== true) {
             lastPlayedRef.current[lastKey] = true
 
-            // اعلان
             if ('Notification' in window && Notification.permission === 'granted') {
               const names = { fajr: 'اذان صبح', dhuhr: 'اذان ظهر', maghrib: 'اذان مغرب' }
-              new Notification('🕌 ' + names[key], {
-                body: 'وقت نماز رسید',
-                icon: '/Ebadat/icon.svg',
-                tag: key,
-              })
+              new Notification('🕌 ' + names[key], { body: 'وقت نماز رسید', icon: '/Ebadat/icon.svg', tag: key })
             }
 
-            // پخش صدا
             if (audioRef.current) {
-              audioRef.current.src = ADHAN_SOUNDS[settings.sound || 'default']
-              audioRef.current.volume = settings.volume ?? 0.7
-              audioRef.current.play().catch(() => {})
+              audioRef.current.volume = settings.volume ?? 0.8
+              audioRef.current.currentTime = 0
+              audioRef.current.play().catch((e) => console.warn('Autoplay blocked:', e))
             }
           }
         })
-      } catch (e) {
-        console.error('Adhan check error:', e)
-      }
-    }, 10000) // هر ۱۰ ثانیه چک کن
+      } catch (e) { console.error('Adhan check error:', e) }
+    }, 5000)
 
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      if (audioRef.current) audioRef.current.pause()
+    }
   }, [])
 
-  return <audio ref={audioRef} preload="none" />
+  return null
 }

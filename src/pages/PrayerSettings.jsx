@@ -12,31 +12,27 @@ const ADHANS = [
   { key: 'maghrib', name: 'اذان مغرب', icon: '🌆' },
 ]
 
-const ADHAN_SOUNDS = {
-  default: { name: 'اذان احمد نفیس', url: 'https://cdn.islamic.network/adhans/128/ahmad-nafees.mp3' },
-  short: { name: 'اذان مشاری العفاسی', url: 'https://cdn.islamic.network/adhans/128/mishary-alafasy.mp3' },
-}
+// فایل اذان داخل پروژه
+const ADHAN_SRC = '/Ebadat/sounds/adhan.mp3'
 
 export default function PrayerSettings() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('city')
 
-  // شهر
   const [selected, setSelected] = useState(getSavedCity())
   const [search, setSearch] = useState('')
   const [locating, setLocating] = useState(false)
   const [locationError, setLocationError] = useState('')
   const [times, setTimes] = useState([])
 
-  // اذان
   const [adhan, setAdhan] = useState({
     enabled: false,
-    sound: 'default',
-    volume: 0.7,
+    volume: 0.8,
     perAdhan: { fajr: true, dhuhr: true, maghrib: true },
   })
   const [notifPermission, setNotifPermission] = useState('default')
   const [previewing, setPreviewing] = useState(false)
+  const [previewError, setPreviewError] = useState('')
 
   useEffect(() => {
     try {
@@ -80,7 +76,7 @@ export default function PrayerSettings() {
         setLocating(false)
       },
       () => {
-        setLocationError('دسترسی به موقعیت مکانی داده نشد')
+        setLocationError('دسترسی به موقعیت داده نشد')
         setLocating(false)
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -101,11 +97,28 @@ export default function PrayerSettings() {
     setNotifPermission(perm)
   }
 
-  const previewSound = () => {
-    const audio = new Audio(ADHAN_SOUNDS[adhan.sound].url)
-    audio.volume = adhan.volume
-    audio.play().then(() => setPreviewing(true)).catch(() => {})
-    audio.onended = () => setPreviewing(false)
+  const previewSound = async () => {
+    setPreviewError('')
+    setPreviewing(true)
+    try {
+      const audio = new Audio(ADHAN_SRC)
+      audio.volume = adhan.volume
+      audio.onended = () => setPreviewing(false)
+      audio.onerror = () => {
+        setPreviewing(false)
+        setPreviewError('خطا در بارگذاری. یک بار دیگه امتحان کن.')
+      }
+      await audio.play()
+      // پخش نمونه فقط ۱۰ ثانیه
+      setTimeout(() => {
+        audio.pause()
+        setPreviewing(false)
+      }, 10000)
+    } catch (e) {
+      console.error(e)
+      setPreviewing(false)
+      setPreviewError('برای پخش، یک بار دیگه روی دکمه بزن.')
+    }
   }
 
   const toggleAdhan = (key) => {
@@ -114,7 +127,6 @@ export default function PrayerSettings() {
 
   return (
     <main className="max-w-md mx-auto pb-24 animate-fade-in bg-mesh-light dark:bg-mesh-dark min-h-screen">
-      {/* هدر */}
       <div className="flex items-center gap-3 p-4 pt-6">
         <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl bg-white dark:bg-dark-surface shadow-soft flex items-center justify-center border border-light-border dark:border-dark-border active:scale-95 transition">
           <ChevronLeft className="text-main" size={20} />
@@ -125,7 +137,6 @@ export default function PrayerSettings() {
         </div>
       </div>
 
-      {/* تب‌ها */}
       <div className="mx-4 mb-4 bg-white dark:bg-dark-surface rounded-2xl p-1.5 flex gap-1.5 shadow-soft border border-light-border dark:border-dark-border">
         <button
           onClick={() => setTab('city')}
@@ -147,10 +158,8 @@ export default function PrayerSettings() {
         </button>
       </div>
 
-      {/* تب شهر */}
       {tab === 'city' && (
         <div className="px-4 animate-fade-in">
-          {/* GPS */}
           <button
             onClick={handleGPS}
             disabled={locating}
@@ -167,11 +176,8 @@ export default function PrayerSettings() {
             </div>
           </button>
 
-          {locationError && (
-            <p className="text-xs text-red-500 text-center mb-3">⚠️ {locationError}</p>
-          )}
+          {locationError && <p className="text-xs text-red-500 text-center mb-3">⚠️ {locationError}</p>}
 
-          {/* نمایش اوقات امروز */}
           {times.length > 0 && (
             <div className="card p-4 mb-4">
               <p className="text-xs font-bold text-sub mb-3">اوقات شرعی امروز - {selected.name}</p>
@@ -198,7 +204,6 @@ export default function PrayerSettings() {
             </div>
           )}
 
-          {/* جستجو */}
           <div className="relative mb-4">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-sub" size={18} />
             <input
@@ -210,7 +215,6 @@ export default function PrayerSettings() {
             />
           </div>
 
-          {/* لیست شهرها */}
           <div className="card overflow-hidden">
             {filtered.length === 0 ? (
               <p className="text-center text-sub py-8 text-sm">شهری پیدا نشد</p>
@@ -248,10 +252,8 @@ export default function PrayerSettings() {
         </div>
       )}
 
-      {/* تب اذان */}
       {tab === 'adhan' && (
         <div className="px-4 animate-fade-in">
-          {/* کلید اصلی */}
           <div className="card p-4 mb-4">
             <button onClick={() => saveAdhan({ ...adhan, enabled: !adhan.enabled })} className="w-full flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -271,7 +273,6 @@ export default function PrayerSettings() {
 
           {adhan.enabled && (
             <>
-              {/* اعلان */}
               <div className="card p-4 mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -300,37 +301,19 @@ export default function PrayerSettings() {
                 )}
               </div>
 
-              {/* انتخاب صدا */}
               <div className="card p-4 mb-4">
-                <p className="font-bold text-main text-sm mb-3">صدای اذان</p>
-                {Object.entries(ADHAN_SOUNDS).map(([key, val]) => (
-                  <button
-                    key={key}
-                    onClick={() => saveAdhan({ ...adhan, sound: key })}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl mb-2 transition ${
-                      adhan.sound === key
-                        ? 'bg-brand-50 dark:bg-brand-900/20 border-2 border-brand-500'
-                        : 'bg-light-bg dark:bg-dark-bg border-2 border-transparent'
-                    }`}
-                  >
-                    <span className="text-sm font-medium text-main">{val.name}</span>
-                    {adhan.sound === key && (
-                      <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center">
-                        <Check size={12} className="text-white" />
-                      </div>
-                    )}
-                  </button>
-                ))}
+                <p className="font-bold text-main text-sm mb-3">پیش‌نمایش اذان</p>
                 <button
                   onClick={previewSound}
                   disabled={previewing}
-                  className="w-full bg-gradient-to-l from-brand-500 to-brand-600 text-white py-2.5 rounded-xl text-sm font-bold mt-2 flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-50"
+                  className="w-full bg-gradient-to-l from-brand-500 to-brand-600 text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-50"
                 >
-                  {previewing ? 'در حال پخش...' : <><Play size={16} /> پخش نمونه</>}
+                  {previewing ? 'در حال پخش... (۱۰ ثانیه)' : <><Play size={16} /> پخش نمونه اذان</>}
                 </button>
+                {previewError && <p className="text-xs text-red-500 text-center mt-2">⚠️ {previewError}</p>}
+                <p className="text-[10px] text-sub text-center mt-2">فقط ۱۰ ثانیه اول پخش می‌شه</p>
               </div>
 
-              {/* کدوم اذان‌ها */}
               <div className="card p-4 mb-4">
                 <p className="font-bold text-main text-sm mb-3">کدوم اذان‌ها پخش بشه؟</p>
                 {ADHANS.map((a) => (
@@ -350,7 +333,6 @@ export default function PrayerSettings() {
                 ))}
               </div>
 
-              {/* حجم صدا */}
               <div className="card p-4 mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
