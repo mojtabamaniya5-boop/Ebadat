@@ -21,14 +21,17 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 border border-gray-100 dark:border-slate-700"
+      className="relative w-14 h-14 rounded-2xl bg-white dark:bg-dark-surface shadow-soft dark:shadow-glow-sm flex items-center justify-center border border-light-border dark:border-dark-border active:scale-95 transition-all overflow-hidden group"
       aria-label="تغییر تم"
     >
-      {dark ? (
-        <Sun className="text-amber-400" size={22} />
-      ) : (
-        <Moon className="text-emerald-600" size={22} />
-      )}
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-50 to-transparent dark:from-brand-900/30 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="relative">
+        {dark ? (
+          <Sun className="text-amber-400 transition-transform group-hover:rotate-90 duration-500" size={22} />
+        ) : (
+          <Moon className="text-brand-500 transition-transform group-hover:-rotate-12 duration-500" size={22} />
+        )}
+      </div>
     </button>
   )
 }

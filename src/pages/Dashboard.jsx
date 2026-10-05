@@ -17,22 +17,22 @@ export default function Dashboard() {
     saveTodayData(newData)
   }
 
-  if (data === null) return <div className="p-8 text-center">در حال بارگذاری...</div>
+  if (data === null) return <div className="p-8 text-center text-sub">در حال بارگذاری...</div>
 
   const totalPrayers = Object.values(data.prayers).filter(v => v && v !== 'qaza').length
   const qazaCount = Object.values(data.prayers).filter(v => v === 'qaza').length
 
   return (
-    <main className="p-4 max-w-md mx-auto animate-fade-in">
+    <main className="p-4 max-w-md mx-auto animate-fade-in bg-mesh-light dark:bg-mesh-dark min-h-screen">
       <div className="flex justify-between items-center mb-6 mt-4">
         <div>
-          <h1 className="text-2xl font-bold text-emerald-800 dark:text-emerald-300">سلام، مجتبی 👋</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">امروز، یک روز جدید</p>
+          <h1 className="text-2xl font-bold text-brand-600 dark:text-brand-400">سلام، مجتبی 👋</h1>
+          <p className="text-sm text-sub mt-1">امروز، یک روز جدید</p>
         </div>
         <div className="flex gap-2">
           <Link to="/calendar">
-            <div className="w-12 h-12 bg-white dark:bg-slate-800 shadow-md rounded-2xl flex items-center justify-center border border-gray-100 dark:border-slate-700">
-              <Calendar className="text-emerald-600 dark:text-emerald-400" size={22} />
+            <div className="w-14 h-14 rounded-2xl bg-white dark:bg-dark-surface shadow-soft flex items-center justify-center border border-light-border dark:border-dark-border active:scale-95 transition">
+              <Calendar className="text-brand-500" size={22} />
             </div>
           </Link>
           <ThemeToggle />
@@ -40,38 +40,41 @@ export default function Dashboard() {
       </div>
 
       {/* چالش */}
-      <div className="bg-gradient-to-l from-emerald-500 to-teal-700 rounded-2xl p-5 text-white shadow-xl mb-6 relative overflow-hidden">
+      <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-glow mb-6 bg-gradient-to-bl from-brand-400 via-brand-500 to-brand-700">
+        <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
         <div className="relative z-10">
-          <span className="bg-white/20 text-xs px-3 py-1 rounded-full mb-3 inline-block">چالش امروز</span>
+          <span className="bg-white/20 backdrop-blur-sm text-xs px-3 py-1 rounded-full mb-3 inline-block">✨ چالش امروز</span>
           <h2 className="text-lg font-bold mb-2">به یک نیازمند کمک کن</h2>
-          <p className="text-emerald-50 text-sm mb-4">امروز یک کار نیک انجام بده و ۱۰ امتیاز بگیر.</p>
+          <p className="text-white/85 text-sm mb-4">امروز یک کار نیک انجام بده و ۱۰ امتیاز بگیر.</p>
           <button
             onClick={toggleChallenge}
-            className={`px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95 ${
-              data.challengeDone ? 'bg-emerald-900 text-white' : 'bg-white text-emerald-700'
+            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 ${
+              data.challengeDone
+                ? 'bg-white/20 backdrop-blur-sm text-white border border-white/30'
+                : 'bg-white text-brand-600 shadow-lg'
             }`}
           >
             {data.challengeDone ? '✓ انجام شد' : 'انجام دادم'}
           </button>
         </div>
-        <Sparkles className="absolute -left-4 -bottom-4 text-emerald-400/20" size={120} />
       </div>
 
       {/* خلاصه */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm mb-6 border border-gray-100 dark:border-slate-700 transition-colors">
-        <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-4">خلاصه امروز</h3>
+      <div className="card p-5 mb-6">
+        <h3 className="font-bold text-main mb-4 text-sm">خلاصه امروز</h3>
         <div className="grid grid-cols-3 gap-3 text-center">
-          <div className="bg-emerald-50 dark:bg-emerald-950 rounded-xl py-3">
-            <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{totalPrayers}</p>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">نماز</p>
+          <div className="bg-brand-50 dark:bg-brand-900/20 rounded-xl py-3 border border-brand-100 dark:border-brand-900/40">
+            <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">{totalPrayers}</p>
+            <p className="text-xs text-brand-500 mt-1">نماز</p>
           </div>
-          <div className="bg-amber-50 dark:bg-amber-950 rounded-xl py-3">
-            <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{data.quran}</p>
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">قرآن</p>
+          <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl py-3 border border-amber-100 dark:border-amber-900/40">
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{data.quran}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">قرآن</p>
           </div>
-          <div className="bg-rose-50 dark:bg-rose-950 rounded-xl py-3">
-            <p className="text-2xl font-bold text-rose-700 dark:text-rose-300">{data.salawat}</p>
-            <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">صلوات</p>
+          <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl py-3 border border-rose-100 dark:border-rose-900/40">
+            <p className="text-2xl font-bold text-rose-600 dark:text-rose-400">{data.salawat}</p>
+            <p className="text-xs text-rose-600 dark:text-rose-500 mt-1">صلوات</p>
           </div>
         </div>
         {qazaCount > 0 && (
@@ -80,27 +83,27 @@ export default function Dashboard() {
       </div>
 
       {/* دسترسی سریع */}
-      <Link to="/track" className="block bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm mb-6 border border-gray-100 dark:border-slate-700 active:scale-[0.98] transition-all">
+      <Link to="/track" className="card p-5 mb-6 active:scale-[0.98] transition-all block">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-            <CheckCircle2 size={18} className="text-emerald-500" />
+          <h3 className="font-bold text-main flex items-center gap-2 text-sm">
+            <CheckCircle2 size={18} className="text-brand-500" />
             ثبت سریع اعمال
           </h3>
-          <ChevronLeft className="text-gray-400" size={20} />
+          <ChevronLeft className="text-sub" size={20} />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 py-3 rounded-xl font-medium text-sm text-center">ثبت نماز</div>
-          <div className="bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 py-3 rounded-xl font-medium text-sm text-center">تلاوت قرآن</div>
-          <div className="bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 py-3 rounded-xl font-medium text-sm text-center">صلوات و ذکر</div>
-          <div className="bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 py-3 rounded-xl font-medium text-sm text-center">دعا و زیارت</div>
+          <div className="bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 py-3 rounded-xl font-medium text-sm text-center border border-brand-100 dark:border-brand-900/40">ثبت نماز</div>
+          <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 py-3 rounded-xl font-medium text-sm text-center border border-amber-100 dark:border-amber-900/40">تلاوت قرآن</div>
+          <div className="bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 py-3 rounded-xl font-medium text-sm text-center border border-sky-100 dark:border-sky-900/40">صلوات و ذکر</div>
+          <div className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 py-3 rounded-xl font-medium text-sm text-center border border-purple-100 dark:border-purple-900/40">دعا و زیارت</div>
         </div>
       </Link>
 
       {/* باغ معنوی */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-700 transition-colors">
-        <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-3">باغ معنوی شما 🌱</h3>
-        <div className="h-32 bg-gradient-to-b from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-slate-900 rounded-xl flex items-center justify-center border border-emerald-200 dark:border-emerald-800 border-dashed">
-          <p className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+      <div className="card p-5">
+        <h3 className="font-bold text-main mb-3 text-sm">باغ معنوی شما 🌱</h3>
+        <div className="h-32 rounded-xl flex items-center justify-center border-2 border-dashed border-brand-200 dark:border-brand-900/50 bg-gradient-to-b from-brand-50/50 to-transparent dark:from-brand-900/10">
+          <p className="text-brand-600 dark:text-brand-400 text-sm font-medium">
             {totalPrayers >= 5 ? '🌟 باغ تو شکوفه داده!' : totalPrayers > 0 ? '🌿 باغت در حال رشد...' : '🌱 باغت منتظر توئه...'}
           </p>
         </div>

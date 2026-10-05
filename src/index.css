@@ -5,15 +5,38 @@
 body {
   font-family: 'Vazirmatn', sans-serif;
   -webkit-tap-highlight-color: transparent;
+  background-color: #F8FAFC;
+  color: #1E293B;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
+html.dark body {
+  background-color: #0F172A;
+  color: #F1F5F9;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #14B8A6; border-radius: 10px; }
 
-body {
-  @apply bg-gray-50 text-gray-900 transition-colors duration-300;
+/* کلاس‌های کاربردی */
+@layer components {
+  .card {
+    @apply bg-white dark:bg-dark-surface rounded-2xl shadow-soft dark:shadow-none border border-light-border dark:border-dark-border transition-colors;
+  }
+  .text-main { @apply text-light-text dark:text-dark-text; }
+  .text-sub { @apply text-light-textSecondary dark:text-dark-textSecondary; }
+  .btn-brand {
+    @apply bg-gradient-to-l from-brand-500 to-brand-600 text-white font-bold rounded-xl transition-all active:scale-95 shadow-glow-sm;
+  }
 }
-.dark body {
-  @apply bg-slate-900 text-gray-100;
+
+/* پس‌زمینه‌های گرادیانتی */
+.bg-mesh-light {
+  background: radial-gradient(circle at 20% 20%, rgba(20, 184, 166, 0.08), transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(20, 184, 166, 0.05), transparent 50%);
+}
+html.dark .bg-mesh-dark {
+  background: radial-gradient(circle at 20% 20%, rgba(20, 184, 166, 0.15), transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(20, 184, 166, 0.08), transparent 50%);
 }
