@@ -1,5 +1,4 @@
-let adhan
-try { adhan = require('adhan') } catch (e) { adhan = null }
+import * as adhan from 'adhan'
 
 export const cities = [
   { name: 'تهران', lat: 35.6892, lng: 51.3890 },
@@ -39,7 +38,7 @@ export const getSavedCity = () => {
     const saved = localStorage.getItem('ebadat-city')
     if (saved) return JSON.parse(saved)
   } catch {}
-  return cities[0]
+  return cities[15] // پیش‌فرض: بوشهر
 }
 
 export const saveCity = (city) => {
@@ -47,7 +46,6 @@ export const saveCity = (city) => {
 }
 
 export const calculatePrayerTimes = (city, date = new Date()) => {
-  if (!adhan) return null
   try {
     const coordinates = new adhan.Coordinates(city.lat, city.lng)
     const params = adhan.CalculationMethod.Tehran()
@@ -67,7 +65,6 @@ export const calculatePrayerTimes = (city, date = new Date()) => {
   }
 }
 
-// فقط ۳ اذان شیعه
 export const getNextPrayer = (times) => {
   if (!times) return null
   const now = new Date()
@@ -82,7 +79,6 @@ export const getNextPrayer = (times) => {
   return null
 }
 
-// لیست کامل اوقات (برای صفحه تنظیمات یا نمایش جزئیات)
 export const getAllTimes = (times) => {
   if (!times) return []
   return [
