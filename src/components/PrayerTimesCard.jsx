@@ -1,30 +1,55 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Clock, MapPin, ChevronLeft } from 'lucide-react'
+import { Clock, MapPin, ChevronLeft, AlertCircle } from 'lucide-react'
 import { getSavedCity, calculatePrayerTimes, getNextPrayer, formatTime, getCountdown } from '../utils/prayerTimes'
 
 export default function PrayerTimesCard() {
   const [city, setCity] = useState(getSavedCity())
   const [next, setNext] = useState(null)
   const [countdown, setCountdown] = useState({ h: 0, m: 0, s: 0 })
+  const [error, setError] = useState(false)
 
   useEffect(() => {
-    const update = () => {
-      const c = getSavedCity()
-      setCity(c)
-      const times = calculatePrayerTimes(c)
-      const n = getNextPrayer(times)
-      setNext(n)
-      setCountdown(getCountdown(n.time))
+    try {
+      const update = () => {
+        const c = getSavedCity()
+        setCity(c)
+        const times = calculatePrayerTimes(c)
+        if (!times) { setError(true); return }
+        const n = getNextPrayer(times)
+        if (!n) { setError(true); return }
+        setNext(n)
+        setCountdown(getCountdown(n.time))
+      }
+      update()
+      const interval = setInterval(update, 1000)
+      return () => clearInterval(interval)
+    } catch (e) {
+      console.error(e)
+      setError(true)
     }
-    update()
-    const interval = setInterval(update, 1000)
-    return () => clearInterval(interval)
   }, [])
 
-  if (!next) return null
-
   const pad = (n) => String(n).padStart(2, '0')
+
+  // نمایش خطا در صورت مشکل
+  if (error || !next) {
+    return (
+      <Link
+        to="/prayer-settings"
+        className="block rounded-2xl p-4 mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/40 active:scale-[0.98] transition"
+      >
+        <div className="flex items-center gap-3">
+          <AlertCircle className="text-amber-500" size={20} />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-amber-700 dark:text-amber-300">تنظیم شهر</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">برای دیدن اوقات شرعی، شهرت رو انتخاب کن</p>
+          </div>
+          <ChevronLeft className="text-amber-500" size={20} />
+        </div>
+      </Link>
+    )
+  }
 
   return (
     <Link
@@ -52,7 +77,6 @@ export default function PrayerTimesCard() {
             <p className="text-xl font-bold text-white flex items-center gap-2">
               <span>{next.icon}</span>
               {next.name}
-              {next.tomorrow && <span className="text-[10px] text-amber-400 font-normal">(فردا)</span>}
             </p>
           </div>
           <p className="text-3xl font-bold text-brand-400">{formatTime(next.time)}</p>
@@ -64,17 +88,11 @@ export default function PrayerTimesCard() {
             <span>باقی‌مانده</span>
           </div>
           <div className="flex items-center gap-1 text-white font-mono font-bold">
-            <div className="bg-white/10 rounded-lg px-2 py-1 min-w-[34px] text-center">
-              {pad(countdown.h)}
-            </div>
+            <div className="bg-white/10 rounded-lg px-2 py-1 min-w-[34px] text-center">{pad(countdown.h)}</div>
             <span className="text-white/50">:</span>
-            <div className="bg-white/10 rounded-lg px-2 py-1 min-w-[34px] text-center">
-              {pad(countdown.m)}
-            </div>
+            <div className="bg-white/10 rounded-lg px-2 py-1 min-w-[34px] text-center">{pad(countdown.m)}</div>
             <span className="text-white/50">:</span>
-            <div className="bg-white/10 rounded-lg px-2 py-1 min-w-[34px] text-center text-brand-400">
-              {pad(countdown.s)}
-            </div>
+            <div className="bg-white/10 rounded-lg px-2 py-1 min-w-[34px] text-center text-brand-400">{pad(countdown.s)}</div>
           </div>
         </div>
       </div>
