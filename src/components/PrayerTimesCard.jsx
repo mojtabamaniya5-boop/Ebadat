@@ -68,7 +68,10 @@ export default function PrayerTimesCard() {
               <MapPin size={14} />
               <span className="text-xs font-medium">{city.name}</span>
             </div>
-            <div className="flex items-center gap-1 text-white/60">
+            <div className="flex items-center gap-2 text-white/60">
+              <a href="/Ebadat/adhan-settings" onClick={(e)=>{e.stopPropagation();e.preventDefault();window.location.href='/Ebadat/adhan-settings'}} className="text-[10px] underline">
+                اذان
+              </a>
               <span className="text-[10px]">تنظیمات</span>
               <ChevronLeft size={14} />
             </div>

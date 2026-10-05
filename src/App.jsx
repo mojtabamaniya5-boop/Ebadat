@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import BottomNav from './components/BottomNav'
+import AdhanPlayer from './components/AdhanPlayer'
 import Dashboard from './pages/Dashboard'
 import Track from './pages/Track'
 import Prayers from './pages/Prayers'
@@ -9,14 +10,15 @@ import Calendar from './pages/Calendar'
 import Analytics from './pages/Analytics'
 import Profile from './pages/Profile'
 import PrayerSettings from './pages/PrayerSettings'
+import AdhanSettings from './pages/AdhanSettings'
 
 function AppContent() {
   const location = useLocation()
-  const isCoach = location.pathname === '/coach'
-  const isSettings = location.pathname === '/prayer-settings'
+  const hideNav = ['/coach', '/prayer-settings', '/adhan-settings'].includes(location.pathname)
 
   return (
-    <div className={`min-h-screen ${isCoach || isSettings ? '' : 'pb-20'} bg-light-bg dark:bg-dark-bg transition-colors duration-300`} dir="rtl">
+    <div className={`min-h-screen ${hideNav ? '' : 'pb-20'} bg-light-bg dark:bg-dark-bg transition-colors duration-300`} dir="rtl">
+      <AdhanPlayer />
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/track" element={<Track />} />
@@ -26,6 +28,7 @@ function AppContent() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/prayer-settings" element={<PrayerSettings />} />
+        <Route path="/adhan-settings" element={<AdhanSettings />} />
       </Routes>
       <BottomNav />
     </div>
