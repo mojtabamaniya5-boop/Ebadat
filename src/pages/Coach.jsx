@@ -1,18 +1,57 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send } from 'lucide-react'
+import { getTodayData } from '../utils/storage'
 
 const ATRIA_API_KEY = 'atr_9YUiFbZJD_QGOdlx5sanX8VxOhOrD4D_';
 const API_URL = 'https://api.atria-asi.ai/v1/chat/completions';
 const MODEL_NAME = 'Atria-Dawn-Preview';
 
-const SYSTEM_PROMPT = `تو "رفیق" هستی، یک همراه معنوی صمیمی و همدل برای جوانان ایرانی.
+// ساخت پرامپت بر اساس داده‌های کاربر
+const buildSystemPrompt = (userData) => {
+  const prayerNames = { fajr: 'صبح', dhuhr: 'ظهر', asr: 'عصر', maghrib: 'مغرب', isha: 'عشا' }
+  const prayersStatus = Object.entries(userData.prayers || {})
+    .map(([k, v]) => {
+      let status = 'ثبت نشده'
+      if (v === 'ontime') status = 'اول وقت ✅'
+      else if (v === 'mid') status = 'میان وقت 🟡'
+      else if (v === 'late') status = 'آخر وقت 🟠'
+      else if (v === 'qaza') status = 'قضا ❌'
+      return `- ${prayerNames[k]}: ${status}`
+    })
+    .join('\n')
+
+  const qazaCount = Object.values(userData.prayers || {}).filter(v => v === 'qaza').length
+  const doneCount = Object.values(userData.prayers || {}).filter(v => v && v !== 'qaza').length
+
+  return `تو "رفیق" هستی، یک همراه معنوی صمیمی و همدل برای جوانان ایرانی.
+
+اطلاعات امروز کاربر (این اطلاعات رو حتماً در جواب‌هات در نظر بگیر):
+${prayersStatus}
+- تعداد نمازهای خوانده‌شده امروز: ${doneCount} از ۵
+- تعداد نمازهای قضای امروز: ${qazaCount}
+- صفحات قرآن خوانده‌شده: ${userData.quran || 0}
+- تعداد صلوات: ${userData.salawat || 0}
+- چالش امروز: ${userData.challengeDone ? 'انجام شده ✅' : 'انجام نشده'}
 
 قوانین سخت‌گیرانه:
-- خیلی کوتاه جواب بده (حداکثر ۱-۲ خط، نهایتاً ۲۰-۳۰ کلمه).
+- پاسخ کوتاه بده (حداکثر ۱-۲ خط، نهایتاً ۲۰-۳۰ کلمه).
 - از شعار، کلیشه، و جمله‌های طولانی پرهیز کن.
 - شبیه یک دوست واقعی حرف بزن، نه یک واعظ.
-- حداکثر ۱ ایموجی در پاسخ.
-- اگه مشکل گفت، اول همدلی کوتاه، بعد یه راهکار عملی کوچیک.`;
+- اگه کاربر از تعداد نماز قضا یا وضعیت اعمالش پرسید، عدد دقیق رو از اطلاعات بالا بگو.
+- اگه نماز قضا داره، دلداری بده و تشویق کن جبران کنه.
+- اگه موفق بوده، تشویق کن.
+- اگه مشکل گفت، اول همدلی کوتاه، بعد یه راهکار عملی کوچیک.
+
+مثال‌ها:
+کاربر: چندتا نماز قضا دارم؟
+رفیق: امروز ۱ نماز قضا داری. نگران نباش، بقیه رو خوب خوندی!
+
+کاربر: چطور بودم امروز؟
+رفیق: ۴ نماز خوندی و ۲۰ صلوات! آفرین 🌱 فقط ۱ قضا داری.
+
+کاربر: حالم بده
+رفیق: چی شده رفیق؟ بگو ببینم چیکار می‌تونم بکنم.`;
+};
 
 export default function Coach() {
   const [messages, setMessages] = useState([
@@ -32,6 +71,10 @@ export default function Coach() {
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setLoading(true);
+
+    // هر بار داده‌های زنده رو می‌خونیم
+    const userData = getTodayData();
+    const systemPrompt = buildSystemPrompt(userData);
     const recentHistory = [...messages, userMessage].slice(-4);
 
     try {
@@ -44,11 +87,11 @@ export default function Coach() {
         body: JSON.stringify({
           model: MODEL_NAME,
           messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'system', content: systemPrompt },
             ...recentHistory,
           ],
           max_tokens: 80,
-          temperature: 0.85,
+          temperature: 0.75,
         }),
       });
       const data = await response.json();
@@ -69,7 +112,7 @@ export default function Coach() {
     <main className="flex flex-col h-screen pb-20 bg-mesh-light dark:bg-mesh-dark">
       <div className="bg-white/85 dark:bg-dark-bg/85 backdrop-blur-xl border-b border-light-border dark:border-dark-border p-4 shadow-soft">
         <h1 className="text-xl font-bold text-brand-600 dark:text-brand-400 text-center">رفیق معنوی</h1>
-        <p className="text-xs text-center text-sub mt-1">همراه همیشگی تو</p>
+        <p className="text-xs text-center text-sub mt-1">از وضعیت امروزت باخبرم 🌱</p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
