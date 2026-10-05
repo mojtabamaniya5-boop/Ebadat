@@ -13,8 +13,8 @@ const ADHANS = [
 ]
 
 const ADHAN_SOUNDS = {
-  default: { name: 'اذان کامل', url: 'https://www.islamcan.com/audio/adhan/azan1.mp3' },
-  short: { name: 'اذان کوتاه', url: 'https://www.islamcan.com/audio/adhan/azan2.mp3' },
+  default: { name: 'اذان احمد نفیس', url: 'https://cdn.islamic.network/adhans/128/ahmad-nafees.mp3' },
+  short: { name: 'اذان مشاری العفاسی', url: 'https://cdn.islamic.network/adhans/128/mishary-alafasy.mp3' },
 }
 
 export default function PrayerSettings() {

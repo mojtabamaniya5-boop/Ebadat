@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react'
 import { getSavedCity, calculatePrayerTimes } from '../utils/prayerTimes'
 
 const ADHAN_SOUNDS = {
-  default: 'https://www.islamcan.com/audio/adhan/azan1.mp3',
-  short: 'https://www.islamcan.com/audio/adhan/azan2.mp3',
+  default: 'https://cdn.islamic.network/adhans/128/ahmad-nafees.mp3',
+  short: 'https://cdn.islamic.network/adhans/128/mishary-alafasy.mp3',
 }
 
 export default function AdhanPlayer() {
