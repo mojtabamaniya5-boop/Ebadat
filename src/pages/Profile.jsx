@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { User, Moon, Sun, Info, Github, Heart } from 'lucide-react'
+import { User, Moon, Sun, Info, Heart } from 'lucide-react'
 
 export default function Profile() {
   const [dark, setDark] = useState(false)

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import jalaali from 'jalaali-js'
+import * as jalaali from 'jalaali-js'
 import { ChevronLeft, ChevronRight, Calendar as CalIcon } from 'lucide-react'
 import { getTodayKey } from '../utils/storage'
 
