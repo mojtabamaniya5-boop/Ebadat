@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send } from 'lucide-react'
 import { getTodayData, getLast7Days } from '../utils/storage'
-import jalaali from 'jalaali-js'
+import * as jalaali from 'jalaali-js'
 
 const ATRIA_API_KEY = 'atr_9YUiFbZJD_QGOdlx5sanX8VxOhOrD4D_';
 const API_URL = 'https://api.atria-asi.ai/v1/chat/completions';
