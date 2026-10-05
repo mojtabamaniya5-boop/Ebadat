@@ -5,6 +5,7 @@ import {
   ChevronLeft, Shield, X, Check
 } from 'lucide-react'
 import { getGlobalStats, exportAllData, importAllData, resetAllData } from '../utils/storage'
+import { calculateTotalXP, getTitle } from '../utils/achievements'
 
 export default function Profile() {
   const [dark, setDark] = useState(false)
