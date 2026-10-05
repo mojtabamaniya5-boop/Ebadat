@@ -280,3 +280,7 @@
 - Fallback در صورت قطع اینترنت
 - Cache روزانه در localStorage
 - کارت تایمر اذان برگشت
+
+## 🚨 قانون طلایی (Workflow)
+
+هر بار که کد جدید داده میشه، این ۴ دستور باید زیر همون کد باشن: npm run build / git add . / git commit / git push
