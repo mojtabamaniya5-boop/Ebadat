@@ -10,6 +10,7 @@ import Calendar from './pages/Calendar'
 import Analytics from './pages/Analytics'
 import Profile from './pages/Profile'
 import PrayerSettings from './pages/PrayerSettings'
+import Hadiths from './pages/Hadiths'
 
 function AppContent() {
   const location = useLocation()
@@ -22,6 +23,7 @@ function AppContent() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/track" element={<Track />} />
         <Route path="/prayers" element={<Prayers />} />
+        <Route path="/hadiths" element={<Hadiths />} />
         <Route path="/coach" element={<Coach />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/analytics" element={<Analytics />} />

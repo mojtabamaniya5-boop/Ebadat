@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, BookOpen, Heart, Calendar, BarChart2, Sparkles, User } from 'lucide-react'
+import { Home, BookOpen, Heart, Calendar, BarChart2, User, BookMarked } from 'lucide-react'
 
 export default function BottomNav() {
   const location = useLocation()
@@ -9,7 +9,7 @@ export default function BottomNav() {
     { path: '/', label: 'داشبورد', icon: Home },
     { path: '/track', label: 'ثبت', icon: BookOpen },
     { path: '/prayers', label: 'دعا', icon: Heart },
-    { path: '/coach', label: 'مربی', icon: Sparkles },
+    { path: '/hadiths', label: 'حدیث', icon: BookMarked },
     { path: '/calendar', label: 'تقویم', icon: Calendar },
     { path: '/analytics', label: 'کارنامه', icon: BarChart2 },
     { path: '/profile', label: 'من', icon: User },
@@ -20,26 +20,10 @@ export default function BottomNav() {
       {items.map(({ path, label, icon: Icon }) => {
         const active = isActive(path)
         return (
-          <Link
-            key={path}
-            to={path}
-            className="flex flex-col items-center px-1 py-1 relative flex-1"
-          >
-            {active && (
-              <div className="absolute -top-1.5 w-6 h-0.5 bg-brand-500 rounded-full shadow-glow" />
-            )}
-            <Icon
-              size={18}
-              strokeWidth={active ? 2.5 : 2}
-              className={`transition-colors ${
-                active ? 'text-brand-500' : 'text-gray-400 dark:text-dark-textSecondary'
-              }`}
-            />
-            <span className={`text-[9px] mt-0.5 font-medium transition-colors ${
-              active ? 'text-brand-500' : 'text-gray-400 dark:text-dark-textSecondary'
-            }`}>
-              {label}
-            </span>
+          <Link key={path} to={path} className="flex flex-col items-center px-0.5 py-1 relative flex-1">
+            {active && <div className="absolute -top-1.5 w-6 h-0.5 bg-brand-500 rounded-full shadow-glow" />}
+            <Icon size={17} strokeWidth={active ? 2.5 : 2} className={`transition-colors ${active ? 'text-brand-500' : 'text-gray-400 dark:text-dark-textSecondary'}`} />
+            <span className={`text-[8px] mt-0.5 font-medium transition-colors ${active ? 'text-brand-500' : 'text-gray-400 dark:text-dark-textSecondary'}`}>{label}</span>
           </Link>
         )
       })}

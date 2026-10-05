@@ -5,6 +5,7 @@ import { getTodayData, saveTodayData } from '../utils/storage'
 import ThemeToggle from '../components/ThemeToggle'
 import PrayerTimesCard from '../components/PrayerTimesCard'
 import SpiritualGarden from '../components/SpiritualGarden'
+import HadithCard from '../components/HadithCard'
 
 export default function Dashboard() {
   const [data, setData] = useState(null)
@@ -63,6 +64,8 @@ export default function Dashboard() {
       </div>
 
       <PrayerTimesCard />
+
+      <HadithCard />
 
       {/* خلاصه */}
       <div className="card p-5 mb-6">
