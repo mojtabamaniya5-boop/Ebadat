@@ -17,8 +17,8 @@ export default defineConfig({
         background_color: '#0F172A',
         display: 'standalone',
         orientation: 'portrait',
-        scope: '/Ebadat/',
-        start_url: '/Ebadat/',
+        scope: './',
+        start_url: './',
         lang: 'fa',
         dir: 'rtl',
         icons: [
@@ -55,7 +55,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/Ebadat/',
+  base: './',
   build: {
     outDir: 'docs',
     emptyOutDir: true,
