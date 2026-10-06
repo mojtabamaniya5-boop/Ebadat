@@ -38,7 +38,7 @@ jobs:
         run: pnpm exec cap add android
 
       - name: Generate app icons
-        run: pnpm exec capacitor-assets generate --android --iconBackgroundColor '#14B8A6' --iconBackgroundColorDark '#0F766E'
+        run: pnpm dlx @capacitor/assets generate --android
 
       - name: Sync Capacitor
         run: pnpm exec cap sync android
