@@ -24,22 +24,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Capacitor globally
-        run: |
-          npm install -g @capacitor/cli
-          npm install @capacitor/core @capacitor/android --legacy-peer-deps --save
+      - name: Install dependencies
+        run: npm install
 
-      - name: Verify cap command
-        run: |
-          which cap || echo "cap not in PATH"
-          cap --version || echo "cap not working"
-          ls -la node_modules/@capacitor/ 2>&1
+      - name: Build web app
+        run: npm run build
 
       - name: Add Android platform
-        run: cap add android
+        run: npx cap add android
 
       - name: Sync Capacitor
-        run: cap sync android
+        run: npx cap sync android
 
       - name: Build APK (debug)
         run: |
