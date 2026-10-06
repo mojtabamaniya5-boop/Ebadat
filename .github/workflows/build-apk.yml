@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout (includes docs/ folder)
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -24,20 +24,22 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Capacitor only
+      - name: Install Capacitor globally
         run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android --legacy-peer-deps
+          npm install -g @capacitor/cli
+          npm install @capacitor/core @capacitor/android --legacy-peer-deps --save
 
-      - name: Verify docs folder exists
+      - name: Verify cap command
         run: |
-          ls -la docs/
-          ls -la docs/index.html
+          which cap || echo "cap not in PATH"
+          cap --version || echo "cap not working"
+          ls -la node_modules/@capacitor/ 2>&1
 
       - name: Add Android platform
-        run: npx cap add android
+        run: cap add android
 
-      - name: Sync Capacitor (uses docs/ folder)
-        run: npx cap sync android
+      - name: Sync Capacitor
+        run: cap sync android
 
       - name: Build APK (debug)
         run: |
