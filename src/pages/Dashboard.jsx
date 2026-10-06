@@ -9,9 +9,13 @@ import HadithCard from '../components/HadithCard'
 
 export default function Dashboard() {
   const [data, setData] = useState(null)
+  const [userName, setUserName] = useState('کاربر همراه')
 
   useEffect(() => {
     setData(getTodayData())
+    // بارگذاری اسم کاربر از localStorage
+    const savedName = localStorage.getItem('ebadat-user-name')
+    if (savedName) setUserName(savedName)
   }, [])
 
   const toggleChallenge = () => {
@@ -29,7 +33,7 @@ export default function Dashboard() {
     <main className="p-4 max-w-md mx-auto animate-fade-in bg-mesh-light dark:bg-mesh-dark min-h-screen">
       <div className="flex justify-between items-center mb-6 mt-4">
         <div>
-          <h1 className="text-2xl font-bold text-brand-600 dark:text-brand-400">سلام، مجتبی 👋</h1>
+          <h1 className="text-2xl font-bold text-brand-600 dark:text-brand-400">سلام، {userName} 👋</h1>
           <p className="text-sm text-sub mt-1">امروز، یک روز جدید</p>
         </div>
         <div className="flex gap-2">
@@ -41,6 +45,8 @@ export default function Dashboard() {
           <ThemeToggle />
         </div>
       </div>
+
+      <PrayerTimesCard />
 
       {/* چالش */}
       <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-glow mb-6 bg-gradient-to-bl from-brand-400 via-brand-500 to-brand-700">
@@ -63,11 +69,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <PrayerTimesCard />
-
+      {/* حدیث امروز */}
       <HadithCard />
 
-      {/* خلاصه */}
+      {/* خلاصه امروز */}
       <div className="card p-5 mb-6">
         <h3 className="font-bold text-main mb-4 text-sm">خلاصه امروز</h3>
         <div className="grid grid-cols-3 gap-3 text-center">
@@ -89,8 +94,11 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* باغ معنوی */}
+      <SpiritualGarden />
+
       {/* دسترسی سریع */}
-      <Link to="/track" className="card p-5 mb-6 active:scale-[0.98] transition-all block">
+      <Link to="/track" className="card p-5 active:scale-[0.98] transition-all block">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-main flex items-center gap-2 text-sm">
             <CheckCircle2 size={18} className="text-brand-500" />
@@ -105,10 +113,6 @@ export default function Dashboard() {
           <div className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 py-3 rounded-xl font-medium text-sm text-center border border-purple-100 dark:border-purple-900/40">دعا و زیارت</div>
         </div>
       </Link>
-
-
-      {/* باغ معنوی جدید */}
-      <SpiritualGarden />
     </main>
   )
 }
