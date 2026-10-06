@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { CheckCircle2, BookOpen, Heart, Check } from 'lucide-react'
 import { getTodayData, saveTodayData } from '../utils/storage'
+import EmptyState from '../components/EmptyState'
 
 export default function Track() {
   const [data, setData] = useState(null)

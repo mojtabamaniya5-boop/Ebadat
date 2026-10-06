@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import BottomNav from './components/BottomNav'
 import AdhanPlayer from './components/AdhanPlayer'
 import Onboarding from './components/Onboarding'
+import InstallPrompt from './components/InstallPrompt'
 import Dashboard from './pages/Dashboard'
 import Track from './pages/Track'
 import Prayers from './pages/Prayers'
@@ -67,6 +68,7 @@ export default function App() {
   return (
     <>
       {showOnboarding && <Onboarding onFinish={finishOnboarding} />}
+      <InstallPrompt />
       <AppContent />
     </>
   )

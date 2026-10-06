@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, Sparkles, ChevronLeft, CheckCircle2, BookMarked, BarChart2 } from 'lucide-react'
+import { Calendar, Sparkles, ChevronLeft, CheckCircle2, BookMarked, BarChart2, MessageCircle } from 'lucide-react'
 import { getTodayData, saveTodayData } from '../utils/storage'
 import ThemeToggle from '../components/ThemeToggle'
 import PrayerTimesCard from '../components/PrayerTimesCard'
@@ -116,6 +116,20 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      <Link to="/coach" className="relative overflow-hidden rounded-2xl p-4 mb-6 bg-gradient-to-bl from-violet-500 via-purple-500 to-indigo-600 text-white shadow-glow-sm active:scale-[0.98] transition group">
+        <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center border border-white/30">
+            <MessageCircle size={22} />
+          </div>
+          <div className="flex-1">
+            <p className="font-bold text-sm">رفیق معنوی 🤝</p>
+            <p className="text-[11px] text-white/80 mt-0.5">سوالی داری؟ باهاش حرف بزن</p>
+          </div>
+          <ChevronLeft size={20} className="text-white/60 group-hover:-translate-x-1 transition" />
+        </div>
+      </Link>
 
       {/* حدیث امروز */}
       <HadithCard />
