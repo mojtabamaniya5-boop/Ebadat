@@ -24,11 +24,18 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies (including dev)
+        run: npm install --include=dev
+        env:
+          NODE_ENV: development
+
+      - name: Verify Vite is installed
+        run: npx vite --version
 
       - name: Build web app
-        run: npm run build
+        run: npx vite build
+        env:
+          NODE_ENV: production
 
       - name: Add Android platform
         run: npx cap add android
