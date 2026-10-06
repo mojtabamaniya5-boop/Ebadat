@@ -500,7 +500,7 @@ export default function Profile() {
 
             <div className="space-y-2">
               <a
-                href="mailto:support@ebadat.app"
+                href="mailto:lianapp.info@gmail.com"
                 className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-glow-sm active:scale-95 transition"
               >
                 <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -508,13 +508,13 @@ export default function Profile() {
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-sm">ایمیل پشتیبانی</p>
-                  <p className="text-xs text-white/80 mt-0.5">support@ebadat.app</p>
+                  <p className="text-xs text-white/80 mt-0.5">lianapp.info@gmail.com</p>
                 </div>
                 <ChevronLeft size={20} className="text-white/70" />
               </a>
 
               <a
-                href="https://t.me/ebadat_app"
+                href="https://ble.ir/lianapp"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-dark-bg border border-light-border dark:border-dark-border active:scale-95 transition"
@@ -523,8 +523,8 @@ export default function Profile() {
                   <MessageCircle size={20} className="text-sky-500" />
                 </div>
                 <div className="flex-1 text-right">
-                  <p className="font-bold text-main text-sm">کانال تلگرام</p>
-                  <p className="text-xs text-sub mt-0.5">اخبار و آپدیت‌ها</p>
+                  <p className="font-bold text-main text-sm">کانال بله</p>
+                  <p className="text-xs text-sub mt-0.5">t.me/lianapp → ble.ir/lianapp</p>
                 </div>
                 <ChevronLeft size={20} className="text-sub" />
               </a>
