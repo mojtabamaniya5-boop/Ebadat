@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  MapPin, Navigation, Search, Check, ChevronLeft,
+  MapPin, Search, Check, ChevronLeft,
   Bell, BellOff, Volume2, VolumeX, Play, AlertCircle
 } from 'lucide-react'
 import { cities, getSavedCity, saveCity, calculatePrayerTimes, getAllTimes, formatTime } from '../utils/prayerTimes'
@@ -20,8 +20,6 @@ export default function PrayerSettings() {
 
   const [selected, setSelected] = useState(getSavedCity())
   const [search, setSearch] = useState('')
-  const [locating, setLocating] = useState(false)
-  const [locationError, setLocationError] = useState('')
   const [times, setTimes] = useState([])
 
   const [adhan, setAdhan] = useState({
@@ -47,39 +45,13 @@ export default function PrayerSettings() {
     if (t) setTimes(getAllTimes(t))
   }
 
-  const filtered = cities.filter(c => c.name.includes(search))
+  const filtered = search.trim() ? cities.filter(c => c.name.includes(search.trim())) : []
 
   const handleSelect = (city) => {
     setSelected(city)
     saveCity(city)
     updateTimes(city)
-  }
-
-  const handleGPS = () => {
-    if (!navigator.geolocation) {
-      setLocationError('برای انتخاب خودکار، از طریق مرورگر اپ رو باز کن')
-      return
-    }
-    setLocating(true)
-    setLocationError('')
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords
-        let nearest = cities[0]
-        let minDist = Infinity
-        cities.forEach(c => {
-          const d = Math.sqrt((c.lat - latitude) ** 2 + (c.lng - longitude) ** 2)
-          if (d < minDist) { minDist = d; nearest = c }
-        })
-        handleSelect(nearest)
-        setLocating(false)
-      },
-      () => {
-        setLocationError('دسترسی به موقعیت داده نشد. شهرت رو دستی انتخاب کن.')
-        setLocating(false)
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
+    setSearch('')
   }
 
   const saveAdhan = (newSettings) => {
@@ -148,27 +120,16 @@ export default function PrayerSettings() {
 
       {tab === 'city' && (
         <div className="px-4 animate-fade-in">
-          <div className="bg-gradient-to-l from-brand-500 to-brand-600 rounded-2xl p-4 mb-4 text-white">
-            <p className="text-sm font-bold mb-1">📍 شهر خودت رو انتخاب کن</p>
-            <p className="text-xs text-white/80 leading-relaxed">
-              برای دقت اوقات شرعی، شهرت رو از لیست پایین انتخاب کن.
-            </p>
-          </div>
-
-          <div className="relative mb-4">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-sub" size={18} />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="جستجوی شهر..."
-              className="w-full bg-white dark:bg-dark-surface border border-light-border dark:border-dark-border rounded-2xl pr-10 pl-4 py-3 text-sm text-main outline-none focus:ring-2 focus:ring-brand-500 transition"
-            />
-          </div>
-
+          {/* 🌟 اوقات شرعی امروز - بالا */}
           {times.length > 0 && (
             <div className="card p-4 mb-4">
-              <p className="text-xs font-bold text-sub mb-3">اوقات شرعی امروز - {selected.name}</p>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-bold text-sub">اوقات شرعی امروز</p>
+                <div className="flex items-center gap-1 bg-brand-50 dark:bg-brand-900/30 px-2 py-1 rounded-full">
+                  <MapPin size={11} className="text-brand-500" />
+                  <span className="text-[11px] font-bold text-brand-600 dark:text-brand-400">{selected.name}</span>
+                </div>
+              </div>
               <div className="space-y-1.5">
                 {times.map((item, i) => {
                   const isAdhan = item.name.startsWith('اذان')
@@ -186,34 +147,66 @@ export default function PrayerSettings() {
             </div>
           )}
 
-          <div className="card overflow-hidden">
-            {filtered.length === 0 ? (
-              <p className="text-center text-sub py-8 text-sm">شهری پیدا نشد</p>
-            ) : (
-              filtered.map((city, i) => {
-                const isSelected = selected.name === city.name
-                return (
-                  <button
-                    key={city.name}
-                    onClick={() => handleSelect(city)}
-                    className={`w-full flex items-center justify-between px-4 py-3.5 text-right active:bg-brand-50 dark:active:bg-brand-900/20 transition ${i !== filtered.length - 1 ? 'border-b border-light-border dark:border-dark-border' : ''}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition ${isSelected ? 'bg-brand-500 text-white' : 'bg-light-bg dark:bg-dark-bg text-sub'}`}>
-                        <MapPin size={16} />
-                      </div>
-                      <span className={`text-sm font-medium ${isSelected ? 'text-brand-600 dark:text-brand-400' : 'text-main'}`}>{city.name}</span>
-                    </div>
-                    {isSelected && (
-                      <div className="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center">
-                        <Check size={14} className="text-white" />
-                      </div>
-                    )}
-                  </button>
-                )
-              })
-            )}
+          {/* 🔍 کادر جستجو - وسط */}
+          <div className="relative mb-3">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-sub" size={18} />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="جستجوی شهر، شهرستان، بخش..."
+              className="w-full bg-white dark:bg-dark-surface border border-light-border dark:border-dark-border rounded-2xl pr-10 pl-4 py-3.5 text-sm text-main outline-none focus:ring-2 focus:ring-brand-500 transition"
+            />
           </div>
+
+          {/* 📋 نتایج جستجو - پایین */}
+          {search.trim() && (
+            <div className="card overflow-hidden max-h-80 overflow-y-auto">
+              {filtered.length === 0 ? (
+                <p className="text-center text-sub py-8 text-sm">
+                  شهر «{search}» پیدا نشد
+                  <br />
+                  <span className="text-xs opacity-70 mt-1 block">فقط شهرهای بزرگ و شهرستان‌ها موجودن</span>
+                </p>
+              ) : (
+                filtered.map((city, i) => {
+                  const isSelected = selected.name === city.name
+                  return (
+                    <button
+                      key={city.name}
+                      onClick={() => handleSelect(city)}
+                      className={`w-full flex items-center justify-between px-4 py-3.5 text-right active:bg-brand-50 dark:active:bg-brand-900/20 transition ${i !== filtered.length - 1 ? 'border-b border-light-border dark:border-dark-border' : ''}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition ${isSelected ? 'bg-brand-500 text-white' : 'bg-light-bg dark:bg-dark-bg text-sub'}`}>
+                          <MapPin size={16} />
+                        </div>
+                        <span className={`text-sm font-medium ${isSelected ? 'text-brand-600 dark:text-brand-400' : 'text-main'}`}>{city.name}</span>
+                      </div>
+                      {isSelected && (
+                        <div className="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center">
+                          <Check size={14} className="text-white" />
+                        </div>
+                      )}
+                    </button>
+                  )
+                })
+              )}
+            </div>
+          )}
+
+          {/* اگه جستجو خالیه، راهنما نشون بده */}
+          {!search.trim() && (
+            <div className="bg-gradient-to-l from-brand-500 to-brand-600 rounded-2xl p-4 text-white">
+              <p className="text-sm font-bold mb-1">📍 شهر خودت رو پیدا کن</p>
+              <p className="text-xs text-white/80 leading-relaxed">
+                اسم شهرت رو توی کادر بالا بنویس و انتخاب کن. اوقات شرعی خودکار آپدیت می‌شه.
+              </p>
+              <p className="text-[10px] text-white/60 mt-2">
+                بیش از ۲۰۰ شهر و شهرستان ایران
+              </p>
+            </div>
+          )}
         </div>
       )}
 
