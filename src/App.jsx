@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import BottomNav from './components/BottomNav'
 import AdhanPlayer from './components/AdhanPlayer'
+import Onboarding from './components/Onboarding'
 import Dashboard from './pages/Dashboard'
 import Track from './pages/Track'
 import Prayers from './pages/Prayers'
@@ -38,9 +39,18 @@ function AppContent() {
 }
 
 export default function App() {
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
   useEffect(() => {
     const saved = localStorage.getItem('ebadat-theme')
     if (saved === 'dark') document.documentElement.classList.add('dark')
+
+    // بررسی اینکه کاربر قبلاً onboarding رو دیده یا نه
+    const hasSeenOnboarding = localStorage.getItem('ebadat-onboarding-done')
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true)
+    }
+
     let lastDay = new Date().toDateString()
     const interval = setInterval(() => {
       const now = new Date().toDateString()
@@ -48,5 +58,16 @@ export default function App() {
     }, 60000)
     return () => clearInterval(interval)
   }, [])
-  return <AppContent />
+
+  const finishOnboarding = () => {
+    localStorage.setItem('ebadat-onboarding-done', 'true')
+    setShowOnboarding(false)
+  }
+
+  return (
+    <>
+      {showOnboarding && <Onboarding onFinish={finishOnboarding} />}
+      <AppContent />
+    </>
+  )
 }
