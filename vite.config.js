@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['icon.svg', 'icon.png'],
       manifest: {
         name: 'همراه معنوی',
         short_name: 'همراه',
@@ -22,22 +22,28 @@ export default defineConfig({
         dir: 'rtl',
         icons: [
           {
-            src: 'icon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
+            src: 'icon.png',
+            sizes: '192x192',
+            type: 'image/png',
             purpose: 'any',
           },
           {
-            src: 'icon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
+            src: 'icon.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: 'icon.png',
+            sizes: '512x512',
+            type: 'image/png',
             purpose: 'maskable',
           },
         ],
         categories: ['lifestyle', 'education'],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,ico,woff2,mp3}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,mp3}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
