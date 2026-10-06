@@ -10,7 +10,7 @@ export default defineConfig({
       includeAssets: ['icon.svg', 'icon.png'],
       manifest: {
         name: 'همراه معنوی',
-        short_name: 'همراه',
+        short_name: 'همراه معنوی',
         description: 'دستیار رشد معنوی روزانه - عبادت، دعا، قرآن',
         theme_color: '#14B8A6',
         background_color: '#0F172A',
