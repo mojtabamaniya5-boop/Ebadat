@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, CheckCircle2, Sparkles, ChevronLeft } from 'lucide-react'
+import { Calendar, Sparkles, ChevronLeft, BookOpen, Heart, Home, CheckCircle2 } from 'lucide-react'
 import { getTodayData, saveTodayData } from '../utils/storage'
 import ThemeToggle from '../components/ThemeToggle'
 import PrayerTimesCard from '../components/PrayerTimesCard'
@@ -13,7 +13,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     setData(getTodayData())
-    // بارگذاری اسم کاربر از localStorage
     const savedName = localStorage.getItem('ebadat-user-name')
     if (savedName) setUserName(savedName)
   }, [])
@@ -28,6 +27,14 @@ export default function Dashboard() {
 
   const totalPrayers = Object.values(data.prayers).filter(v => v && v !== 'qaza').length
   const qazaCount = Object.values(data.prayers).filter(v => v === 'qaza').length
+
+  // درصد پیشرفت روز
+  const dailyProgress = Math.min(
+    (totalPrayers / 5) * 60 +
+    Math.min(data.quran / 5, 1) * 20 +
+    Math.min(data.salawat / 100, 1) * 20,
+    100
+  )
 
   return (
     <main className="p-4 max-w-md mx-auto animate-fade-in bg-mesh-light dark:bg-mesh-dark min-h-screen">
@@ -72,47 +79,180 @@ export default function Dashboard() {
       {/* حدیث امروز */}
       <HadithCard />
 
-      {/* خلاصه امروز */}
-      <div className="card p-5 mb-6">
-        <h3 className="font-bold text-main mb-4 text-sm">خلاصه امروز</h3>
-        <div className="grid grid-cols-3 gap-3 text-center">
-          <div className="bg-brand-50 dark:bg-brand-900/20 rounded-xl py-3 border border-brand-100 dark:border-brand-900/40">
-            <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">{totalPrayers}</p>
-            <p className="text-xs text-brand-500 mt-1">نماز</p>
+      {/* ✨ خلاصه امروز - طراحی جدید */}
+      <div className="relative overflow-hidden rounded-3xl p-5 mb-6 bg-gradient-to-bl from-slate-900 via-slate-800 to-slate-900 dark:from-dark-surface dark:via-dark-bg dark:to-dark-surface border border-slate-700/50 shadow-soft-lg">
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-500/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl" />
+
+        <div className="relative z-10">
+          {/* هدر */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-bl from-brand-400 to-brand-600 flex items-center justify-center shadow-glow-sm">
+                <Sparkles size={16} className="text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-sm">خلاصه امروز</h3>
+                <p className="text-[10px] text-white/50">پیشرفت معنوی تو</p>
+              </div>
+            </div>
+            <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/10">
+              <span className="text-xs font-bold text-brand-400">{Math.round(dailyProgress)}%</span>
+            </div>
           </div>
-          <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl py-3 border border-amber-100 dark:border-amber-900/40">
-            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{data.quran}</p>
-            <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">قرآن</p>
+
+          {/* نوار پیشرفت */}
+          <div className="mb-4 h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-l from-brand-400 via-emerald-400 to-teal-400 rounded-full transition-all duration-1000 shadow-glow"
+              style={{ width: `${dailyProgress}%` }}
+            />
           </div>
-          <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl py-3 border border-rose-100 dark:border-rose-900/40">
-            <p className="text-2xl font-bold text-rose-600 dark:text-rose-400">{data.salawat}</p>
-            <p className="text-xs text-rose-600 dark:text-rose-500 mt-1">صلوات</p>
+
+          {/* کارت‌های آماری */}
+          <div className="grid grid-cols-3 gap-2.5">
+            <StatCard
+              icon="🕌"
+              value={totalPrayers}
+              total={5}
+              label="نماز"
+              color="from-emerald-500 to-teal-600"
+              progress={(totalPrayers / 5) * 100}
+            />
+            <StatCard
+              icon="📖"
+              value={data.quran}
+              total={5}
+              label="قرآن"
+              color="from-amber-500 to-orange-600"
+              progress={Math.min((data.quran / 5) * 100, 100)}
+            />
+            <StatCard
+              icon="💚"
+              value={data.salawat}
+              total={100}
+              label="صلوات"
+              color="from-rose-500 to-pink-600"
+              progress={Math.min((data.salawat / 100) * 100, 100)}
+            />
           </div>
+
+          {qazaCount > 0 && (
+            <div className="mt-4 flex items-center gap-2 bg-red-500/15 backdrop-blur-sm rounded-xl px-3 py-2 border border-red-500/30">
+              <span className="text-sm">⚠️</span>
+              <p className="text-xs text-red-300">{qazaCount} نماز قضا داری، جبران کن!</p>
+            </div>
+          )}
         </div>
-        {qazaCount > 0 && (
-          <p className="text-xs text-red-600 dark:text-red-400 text-center mt-3">⚠️ {qazaCount} نماز قضا داری</p>
-        )}
       </div>
 
       {/* باغ معنوی */}
       <SpiritualGarden />
 
-      {/* دسترسی سریع */}
-      <Link to="/track" className="card p-5 active:scale-[0.98] transition-all block">
-        <div className="flex items-center justify-between mb-4">
+      {/* ✨ ثبت سریع اعمال - طراحی جدید */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3 px-1">
           <h3 className="font-bold text-main flex items-center gap-2 text-sm">
-            <CheckCircle2 size={18} className="text-brand-500" />
+            <CheckCircle2 size={16} className="text-brand-500" />
             ثبت سریع اعمال
           </h3>
-          <ChevronLeft className="text-sub" size={20} />
+          <span className="text-[10px] text-sub">با یک لمس</span>
         </div>
+
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 py-3 rounded-xl font-medium text-sm text-center border border-brand-100 dark:border-brand-900/40">ثبت نماز</div>
-          <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 py-3 rounded-xl font-medium text-sm text-center border border-amber-100 dark:border-amber-900/40">تلاوت قرآن</div>
-          <div className="bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300 py-3 rounded-xl font-medium text-sm text-center border border-sky-100 dark:border-sky-900/40">صلوات و ذکر</div>
-          <div className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 py-3 rounded-xl font-medium text-sm text-center border border-purple-100 dark:border-purple-900/40">دعا و زیارت</div>
+          <QuickButton
+            to="/track"
+            emoji="🕌"
+            label="ثبت نماز"
+            subtitle="۵ نماز واجب"
+            gradient="from-emerald-500 via-teal-500 to-cyan-600"
+            delay={0}
+          />
+          <QuickButton
+            to="/track"
+            emoji="📖"
+            label="تلاوت قرآن"
+            subtitle="صفحه به صفحه"
+            gradient="from-amber-500 via-orange-500 to-red-500"
+            delay={0.05}
+          />
+          <QuickButton
+            to="/prayers"
+            emoji="📿"
+            label="صلوات و ذکر"
+            subtitle="شمارنده هوشمند"
+            gradient="from-rose-500 via-pink-500 to-fuchsia-500"
+            delay={0.1}
+          />
+          <QuickButton
+            to="/prayers"
+            emoji="🤲"
+            label="دعا و زیارت"
+            subtitle="ادعیه کامل"
+            gradient="from-violet-500 via-purple-500 to-indigo-600"
+            delay={0.15}
+          />
         </div>
-      </Link>
+      </div>
     </main>
+  )
+}
+
+// کارت آماری با نوار پیشرفت دایره‌ای
+function StatCard({ icon, value, total, label, color, progress }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl p-3 bg-white/5 backdrop-blur-sm border border-white/10">
+      <div className={`absolute inset-0 bg-gradient-to-bl ${color} opacity-10`} />
+
+      <div className="relative z-10 flex flex-col items-center">
+        <span className="text-2xl mb-1">{icon}</span>
+        <p className="text-2xl font-bold text-white leading-none">{value}</p>
+        <p className="text-[10px] text-white/50 mt-1">از {total} {label}</p>
+
+        {/* نوار پیشرفت کوچیک */}
+        <div className="w-full mt-2 h-1 bg-white/10 rounded-full overflow-hidden">
+          <div
+            className={`h-full bg-gradient-to-l ${color} rounded-full transition-all duration-1000`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// دکمه سریع با گرادیانت رنگی و انیمیشن
+function QuickButton({ to, emoji, label, subtitle, gradient, delay }) {
+  return (
+    <Link
+      to={to}
+      className="relative overflow-hidden rounded-2xl p-4 shadow-soft-lg active:scale-95 transition-all duration-300 animate-slide-up group"
+      style={{ animationDelay: `${delay}s` }}
+    >
+      {/* پس‌زمینه گرادیانت */}
+      <div className={`absolute inset-0 bg-gradient-to-bl ${gradient}`} />
+
+      {/* افکت لیکوئید درخشان */}
+      <div className="absolute -top-8 -right-8 w-24 h-24 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+      <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-black/20 rounded-full blur-2xl" />
+
+      {/* درخشش شیشه‌ای */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/10 opacity-60" />
+
+      <div className="relative z-10">
+        <div className="flex items-start justify-between mb-3">
+          <div className="w-12 h-12 rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center text-2xl shadow-inner border border-white/30 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+            {emoji}
+          </div>
+          <ChevronLeft size={20} className="text-white/60 group-hover:text-white group-hover:-translate-x-1 transition-all duration-300" />
+        </div>
+
+        <p className="text-white font-bold text-sm mb-0.5 drop-shadow-sm">{label}</p>
+        <p className="text-white/70 text-[10px]">{subtitle}</p>
+      </div>
+
+      {/* افکت موج روی کلیک */}
+      <div className="absolute inset-0 bg-white/0 group-active:bg-white/20 transition-colors duration-300" />
+    </Link>
   )
 }
