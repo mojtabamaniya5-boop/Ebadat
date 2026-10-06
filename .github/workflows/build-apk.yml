@@ -24,18 +24,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install dependencies (including dev)
-        run: npm install --include=dev
-        env:
-          NODE_ENV: development
+      - name: Install ALL dependencies explicitly
+        run: |
+          npm install react react-dom react-router-dom framer-motion lucide-react recharts jalaali-js adhan
+          npm install -D vite @vitejs/plugin-react vite-plugin-pwa tailwindcss postcss autoprefixer
+          npm install @capacitor/core @capacitor/cli @capacitor/android
 
-      - name: Verify Vite is installed
-        run: npx vite --version
+      - name: Verify installations
+        run: |
+          npx vite --version
+          ls node_modules/vite-plugin-pwa 2>&1 | head -1
 
       - name: Build web app
         run: npx vite build
-        env:
-          NODE_ENV: production
 
       - name: Add Android platform
         run: npx cap add android
