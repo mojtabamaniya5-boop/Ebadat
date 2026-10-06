@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout (includes docs/ folder)
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -24,22 +24,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Verify installations
+      - name: Install Capacitor only
         run: |
-          npx vite --version
-          ls node_modules/vite-plugin-pwa 2>&1 | head -1
-          ls node_modules/@vitejs/plugin-react 2>&1 | head -1
+          npm install @capacitor/core @capacitor/cli @capacitor/android --legacy-peer-deps
 
-      - name: Build web app
-        run: npx vite build
+      - name: Verify docs folder exists
+        run: |
+          ls -la docs/
+          ls -la docs/index.html
 
       - name: Add Android platform
         run: npx cap add android
 
-      - name: Sync Capacitor
+      - name: Sync Capacitor (uses docs/ folder)
         run: npx cap sync android
 
       - name: Build APK (debug)
