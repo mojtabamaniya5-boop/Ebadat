@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK (Release Signed)
 
 on:
   push:
@@ -43,15 +43,63 @@ jobs:
       - name: Sync Capacitor
         run: pnpm exec cap sync android
 
-      - name: Build APK (debug)
+      - name: Generate Keystore (if not exists in secrets)
+        run: |
+          cd android
+          keytool -genkey -v \
+            -keystore ebadat-release.keystore \
+            -alias ebadat \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass ebadat@2024 \
+            -keypass ebadat@2024 \
+            -dname "CN=Lian App, OU=Dev, O=Lian, L=Bushehr, ST=Bushehr, C=IR"
+          
+          # نمایش محتوای keystore به صورت Base64
+          echo "=== KEYSTORE_BASE64 ==="
+          base64 ebadat-release.keystore
+          echo "=== END ==="
+
+      - name: Add signing config
+        run: |
+          cd android/app
+          cat >> build.gradle << 'EOF'
+
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file("../ebadat-release.keystore")
+                      storePassword "ebadat@2024"
+                      keyAlias "ebadat"
+                      keyPassword "ebadat@2024"
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                  }
+              }
+          }
+          EOF
+
+      - name: Build APK (release)
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
 
-      - name: Upload APK
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: ebadat-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: ebadat-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 30
+
+      - name: Upload Keystore (IMPORTANT - save this!)
+        uses: actions/upload-artifact@v4
+        with:
+          name: keystore-backup
+          path: android/ebadat-release.keystore
+          retention-days: 90
