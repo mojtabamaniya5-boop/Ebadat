@@ -43,14 +43,17 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   useEffect(() => {
+    // تم پیش‌فرض تاریک
     const saved = localStorage.getItem('ebadat-theme')
-    if (saved === 'dark') document.documentElement.classList.add('dark')
-
-    // بررسی اینکه کاربر قبلاً onboarding رو دیده یا نه
-    const hasSeenOnboarding = localStorage.getItem('ebadat-onboarding-done')
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true)
+    if (saved !== 'light') {
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('ebadat-theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark')
     }
+
+    const hasSeenOnboarding = localStorage.getItem('ebadat-onboarding-done')
+    if (!hasSeenOnboarding) setShowOnboarding(true)
 
     let lastDay = new Date().toDateString()
     const interval = setInterval(() => {

@@ -4385,7 +4385,7 @@ clientsClaim();
  */
 precacheAndRoute([{
   "url": "index.html",
-  "revision": "3834a90930c83880ad875f865dcf3c3a"
+  "revision": "fdc67e9360224d4b446abda6473b1e26"
 }, {
   "url": "icons.svg",
   "revision": "3b4fcfcf393eca4d264dca4a4663bc37"
@@ -4405,7 +4405,7 @@ precacheAndRoute([{
   "url": "assets/index-HWNSCL6w.css",
   "revision": null
 }, {
-  "url": "assets/index-DWnYaAxg.js",
+  "url": "assets/index-B-aQEiCY.js",
   "revision": null
 }, {
   "url": "icon.png",
