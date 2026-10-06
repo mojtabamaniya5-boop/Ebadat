@@ -8,9 +8,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'icon.png'],
+      minify: false,
       manifest: {
         name: 'همراه معنوی',
-        short_name: 'همراه معنوی',
+        short_name: 'همراه',
         description: 'دستیار رشد معنوی روزانه - عبادت، دعا، قرآن',
         theme_color: '#14B8A6',
         background_color: '#0F172A',
@@ -21,29 +22,16 @@ export default defineConfig({
         lang: 'fa',
         dir: 'rtl',
         icons: [
-          {
-            src: 'icon.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any',
-          },
-          {
-            src: 'icon.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any',
-          },
-          {
-            src: 'icon.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
+          { src: 'icon.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icon.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
         categories: ['lifestyle', 'education'],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,mp3}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        mode: 'development',
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
@@ -56,6 +44,17 @@ export default defineConfig({
               },
             },
           },
+          {
+            urlPattern: /\.mp3$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'audio-cache',
+              expiration: {
+                maxEntries: 5,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
         ],
       },
     }),
@@ -64,5 +63,7 @@ export default defineConfig({
   build: {
     outDir: 'docs',
     emptyOutDir: true,
+    minify: 'esbuild',
+    terserOptions: undefined,
   },
 })
