@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Capacitor } from '@capacitor/core'
-import { Geolocation } from '@capacitor/geolocation'
 import {
   MapPin, Navigation, Search, Check, ChevronLeft,
   Bell, BellOff, Volume2, VolumeX, Play, AlertCircle
@@ -57,69 +55,31 @@ export default function PrayerSettings() {
     updateTimes(city)
   }
 
-  // ✅ پیدا کردن نزدیک‌ترین شهر از مختصات
-  const findNearestCity = (latitude, longitude) => {
-    let nearest = cities[0]
-    let minDist = Infinity
-    cities.forEach(c => {
-      const d = Math.sqrt((c.lat - latitude) ** 2 + (c.lng - longitude) ** 2)
-      if (d < minDist) { minDist = d; nearest = c }
-    })
-    return nearest
-  }
-
-  // ✅ تابع اصلی GPS — هم برای Web هم برای APK
-  const handleGPS = async () => {
+  const handleGPS = () => {
+    if (!navigator.geolocation) {
+      setLocationError('برای انتخاب خودکار، از طریق مرورگر اپ رو باز کن')
+      return
+    }
     setLocating(true)
     setLocationError('')
-
-    try {
-      // توی APK از Capacitor استفاده کن
-      if (Capacitor.isNativePlatform()) {
-        // درخواست اجازه (پیام اندروید میاد)
-        const permission = await Geolocation.requestPermissions()
-        if (permission.location !== 'granted') {
-          setLocationError('برای استفاده از GPS، اجازه دسترسی لازمه')
-          setLocating(false)
-          return
-        }
-
-        // گرفتن موقعیت
-        const position = await Geolocation.getCurrentPosition({
-          enableHighAccuracy: true,
-          timeout: 15000,
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords
+        let nearest = cities[0]
+        let minDist = Infinity
+        cities.forEach(c => {
+          const d = Math.sqrt((c.lat - latitude) ** 2 + (c.lng - longitude) ** 2)
+          if (d < minDist) { minDist = d; nearest = c }
         })
-
-        const nearest = findNearestCity(position.coords.latitude, position.coords.longitude)
         handleSelect(nearest)
         setLocating(false)
-        return
-      }
-
-      // توی Web (PWA) از API مرورگر
-      if (!navigator.geolocation) {
-        setLocationError('مرورگر شما از GPS پشتیبانی نمی‌کنه')
+      },
+      () => {
+        setLocationError('دسترسی به موقعیت داده نشد. شهرت رو دستی انتخاب کن.')
         setLocating(false)
-        return
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const nearest = findNearestCity(pos.coords.latitude, pos.coords.longitude)
-          handleSelect(nearest)
-          setLocating(false)
-        },
-        () => {
-          setLocationError('دسترسی به موقعیت داده نشد')
-          setLocating(false)
-        },
-        { enableHighAccuracy: true, timeout: 15000 }
-      )
-    } catch (err) {
-      console.error('GPS error:', err)
-      setLocationError('خطا در تشخیص موقعیت. دوباره امتحان کن.')
-      setLocating(false)
-    }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
   }
 
   const saveAdhan = (newSettings) => {
@@ -188,23 +148,23 @@ export default function PrayerSettings() {
 
       {tab === 'city' && (
         <div className="px-4 animate-fade-in">
-          <button
-            onClick={handleGPS}
-            disabled={locating}
-            className="w-full bg-gradient-to-l from-brand-500 to-brand-600 text-white p-4 rounded-2xl shadow-glow-sm flex items-center justify-between mb-4 active:scale-[0.98] transition disabled:opacity-70"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Navigation size={20} className={locating ? 'animate-spin' : ''} />
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-sm">{locating ? 'در حال یافتن...' : 'تشخیص خودکار'}</p>
-                <p className="text-xs text-white/80 mt-0.5">با GPS گوشی</p>
-              </div>
-            </div>
-          </button>
+          <div className="bg-gradient-to-l from-brand-500 to-brand-600 rounded-2xl p-4 mb-4 text-white">
+            <p className="text-sm font-bold mb-1">📍 شهر خودت رو انتخاب کن</p>
+            <p className="text-xs text-white/80 leading-relaxed">
+              برای دقت اوقات شرعی، شهرت رو از لیست پایین انتخاب کن.
+            </p>
+          </div>
 
-          {locationError && <p className="text-xs text-red-500 text-center mb-3">⚠️ {locationError}</p>}
+          <div className="relative mb-4">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-sub" size={18} />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="جستجوی شهر..."
+              className="w-full bg-white dark:bg-dark-surface border border-light-border dark:border-dark-border rounded-2xl pr-10 pl-4 py-3 text-sm text-main outline-none focus:ring-2 focus:ring-brand-500 transition"
+            />
+          </div>
 
           {times.length > 0 && (
             <div className="card p-4 mb-4">
@@ -225,17 +185,6 @@ export default function PrayerSettings() {
               </div>
             </div>
           )}
-
-          <div className="relative mb-4">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-sub" size={18} />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="جستجوی شهر..."
-              className="w-full bg-white dark:bg-dark-surface border border-light-border dark:border-dark-border rounded-2xl pr-10 pl-4 py-3 text-sm text-main outline-none focus:ring-2 focus:ring-brand-500 transition"
-            />
-          </div>
 
           <div className="card overflow-hidden">
             {filtered.length === 0 ? (
@@ -289,26 +238,6 @@ export default function PrayerSettings() {
 
           {adhan.enabled && (
             <>
-              <div className="card p-4 mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
-                      <Bell className="text-amber-500" size={20} />
-                    </div>
-                    <div>
-                      <p className="font-bold text-main text-sm">اعلان مرورگر</p>
-                      <p className="text-xs text-sub mt-0.5">نمایش روی گوشی</p>
-                    </div>
-                  </div>
-                  {notifPermission === 'granted' ? (
-                    <div className="flex items-center gap-1 text-brand-500 text-xs font-bold"><Check size={16} /> فعال</div>
-                  ) : (
-                    <button onClick={requestNotification} className="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold active:scale-95 transition">فعال کن</button>
-                  )}
-                </div>
-                {notifPermission === 'denied' && <p className="text-xs text-red-500 flex items-center gap-1 mt-2"><AlertCircle size={12} /> اعلان مسدود شده</p>}
-              </div>
-
               <div className="card p-4 mb-4">
                 <p className="font-bold text-main text-sm mb-3">پیش‌نمایش اذان</p>
                 <button onClick={previewSound} disabled={previewing} className="w-full bg-gradient-to-l from-brand-500 to-brand-600 text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-50">
