@@ -37,17 +37,17 @@ jobs:
       - name: Add Android platform
         run: pnpm exec cap add android
 
+      - name: Generate app icons
+        run: pnpm exec capacitor-assets generate --android --iconBackgroundColor '#14B8A6' --iconBackgroundColorDark '#0F766E'
+
       - name: Sync Capacitor
         run: pnpm exec cap sync android
-
-      - name: Clear Gradle cache
-        run: rm -rf ~/.gradle/caches
 
       - name: Build APK (debug)
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
