@@ -18,21 +18,21 @@ function AppContent() {
   const hideNav = ['/coach', '/prayer-settings'].includes(location.pathname)
 
   return (
-    <div className={`min-h-screen ${hideNav ? '' : 'pb-20'} bg-light-bg dark:bg-dark-bg transition-colors duration-300`} dir="rtl">
+    <div className={`min-h-screen ${hideNav ? '' : 'pb-24'} bg-light-bg dark:bg-dark-bg transition-colors duration-300`} dir="rtl">
       <AdhanPlayer />
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/track" element={<Track />} />
         <Route path="/prayers" element={<Prayers />} />
         <Route path="/hadiths" element={<Hadiths />} />
-        <Route path="/achievements" element={<Achievements />} />
         <Route path="/coach" element={<Coach />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/prayer-settings" element={<PrayerSettings />} />
+        <Route path="/achievements" element={<Achievements />} />
       </Routes>
-      <BottomNav />
+      {!hideNav && <BottomNav />}
     </div>
   )
 }
