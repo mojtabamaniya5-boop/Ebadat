@@ -8,7 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'icon.png'],
-      minify: false,
+      strategies: 'generateSW',
       manifest: {
         name: 'همراه معنوی',
         short_name: 'همراه',
@@ -29,19 +29,18 @@ export default defineConfig({
         categories: ['lifestyle', 'education'],
       },
       workbox: {
+        mode: 'development',
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-        mode: 'development',
+        sourcemap: false,
+        inlineWorkboxRuntime: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
-              },
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
             },
           },
           {
@@ -49,10 +48,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'audio-cache',
-              expiration: {
-                maxEntries: 5,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
+              expiration: { maxEntries: 5, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
         ],
@@ -63,7 +59,5 @@ export default defineConfig({
   build: {
     outDir: 'docs',
     emptyOutDir: true,
-    minify: 'esbuild',
-    terserOptions: undefined,
   },
 })
