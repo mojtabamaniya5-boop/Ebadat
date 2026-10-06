@@ -54,12 +54,9 @@ export default function Dashboard() {
 
       <PrayerTimesCard />
 
-      {/* ✨ دسترسی سریع به بخش‌های فرعی */}
+      {/* دسترسی سریع */}
       <div className="grid grid-cols-3 gap-2.5 mb-5">
-        <Link
-          to="/calendar"
-          className="relative overflow-hidden rounded-2xl p-3 bg-white dark:bg-dark-surface border border-light-border dark:border-dark-border shadow-soft active:scale-95 transition group"
-        >
+        <Link to="/calendar" className="relative overflow-hidden rounded-2xl p-3 bg-white dark:bg-dark-surface border border-light-border dark:border-dark-border shadow-soft active:scale-95 transition group">
           <div className="absolute -top-4 -right-4 w-16 h-16 bg-sky-500/10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500" />
           <div className="relative flex flex-col items-center gap-1.5">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-bl from-sky-400 to-blue-600 flex items-center justify-center shadow-glow-sm">
@@ -69,10 +66,7 @@ export default function Dashboard() {
           </div>
         </Link>
 
-        <Link
-          to="/hadiths"
-          className="relative overflow-hidden rounded-2xl p-3 bg-white dark:bg-dark-surface border border-light-border dark:border-dark-border shadow-soft active:scale-95 transition group"
-        >
+        <Link to="/hadiths" className="relative overflow-hidden rounded-2xl p-3 bg-white dark:bg-dark-surface border border-light-border dark:border-dark-border shadow-soft active:scale-95 transition group">
           <div className="absolute -top-4 -right-4 w-16 h-16 bg-amber-500/10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500" />
           <div className="relative flex flex-col items-center gap-1.5">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-bl from-amber-400 to-orange-600 flex items-center justify-center shadow-glow-sm">
@@ -82,10 +76,7 @@ export default function Dashboard() {
           </div>
         </Link>
 
-        <Link
-          to="/analytics"
-          className="relative overflow-hidden rounded-2xl p-3 bg-white dark:bg-dark-surface border border-light-border dark:border-dark-border shadow-soft active:scale-95 transition group"
-        >
+        <Link to="/analytics" className="relative overflow-hidden rounded-2xl p-3 bg-white dark:bg-dark-surface border border-light-border dark:border-dark-border shadow-soft active:scale-95 transition group">
           <div className="absolute -top-4 -right-4 w-16 h-16 bg-violet-500/10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500" />
           <div className="relative flex flex-col items-center gap-1.5">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-bl from-violet-400 to-purple-600 flex items-center justify-center shadow-glow-sm">
@@ -117,21 +108,29 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <Link to="/coach" className="relative overflow-hidden rounded-2xl p-4 mb-6 bg-gradient-to-bl from-violet-500 via-purple-500 to-indigo-600 text-white shadow-glow-sm active:scale-[0.98] transition group">
+      {/* کارت مربی معنوی - کاملاً اصلاح شده */}
+      <Link
+        to="/coach"
+        className="block relative overflow-hidden rounded-2xl p-4 mb-5 bg-gradient-to-l from-violet-500 via-purple-500 to-indigo-600 text-white shadow-glow-sm active:scale-[0.98] transition group"
+      >
         <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+        <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-black/20 rounded-full blur-2xl" />
+
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center border border-white/30">
-            <MessageCircle size={22} />
+          <div className="w-12 h-12 rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center border border-white/30 flex-shrink-0">
+            <MessageCircle size={22} className="text-white" />
           </div>
-          <div className="flex-1">
-            <p className="font-bold text-sm">رفیق معنوی 🤝</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-sm flex items-center gap-1">
+              رفیق معنوی
+              <span className="text-base">🤝</span>
+            </p>
             <p className="text-[11px] text-white/80 mt-0.5">سوالی داری؟ باهاش حرف بزن</p>
           </div>
-          <ChevronLeft size={20} className="text-white/60 group-hover:-translate-x-1 transition" />
+          <ChevronLeft size={20} className="text-white/70 group-hover:-translate-x-1 transition-transform flex-shrink-0" />
         </div>
       </Link>
 
-      {/* حدیث امروز */}
       <HadithCard />
 
       {/* خلاصه امروز */}
