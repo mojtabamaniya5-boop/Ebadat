@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   User, Moon, Sun, Download, Upload, Trash2, Info,
   Heart, Award, Flame, BookOpen, CheckCircle2, AlertCircle,
-  ChevronLeft, Shield, X, Check, Trophy, Sparkles
+  ChevronLeft, Shield, X, Check, Trophy, Camera, Pencil, Save
 } from 'lucide-react'
 import { getGlobalStats, exportAllData, importAllData, resetAllData } from '../utils/storage'
 import { calculateTotalXP, getTitle, getStreak } from '../utils/achievements'
@@ -14,10 +14,15 @@ export default function Profile() {
   const [xp, setXp] = useState(0)
   const [title, setTitle] = useState(null)
   const [streak, setStreak] = useState(0)
+  const [userName, setUserName] = useState('کاربر همراه')
+  const [userAvatar, setUserAvatar] = useState(null)
+  const [editingName, setEditingName] = useState(false)
+  const [tempName, setTempName] = useState('')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
   const [toast, setToast] = useState(null)
   const fileInputRef = useRef(null)
+  const avatarInputRef = useRef(null)
 
   useEffect(() => {
     setDark(localStorage.getItem('ebadat-theme') === 'dark')
@@ -26,11 +31,53 @@ export default function Profile() {
     setXp(x)
     setTitle(getTitle(x))
     setStreak(getStreak())
+
+    // بارگذاری نام و عکس
+    const savedName = localStorage.getItem('ebadat-user-name')
+    const savedAvatar = localStorage.getItem('ebadat-user-avatar')
+    if (savedName) { setUserName(savedName); setTempName(savedName) }
+    if (savedAvatar) setUserAvatar(savedAvatar)
   }, [])
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 2500)
+  }
+
+  const saveName = () => {
+    if (!tempName.trim()) {
+      showToast('اسم نمی‌تونه خالی باشه', 'error')
+      return
+    }
+    setUserName(tempName.trim())
+    localStorage.setItem('ebadat-user-name', tempName.trim())
+    setEditingName(false)
+    showToast('اسم ذخیره شد ✅')
+  }
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('حجم عکس باید کمتر از ۲ مگابایت باشه', 'error')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const base64 = event.target.result
+      setUserAvatar(base64)
+      localStorage.setItem('ebadat-user-avatar', base64)
+      showToast('عکس پروفایل ذخیره شد 📸')
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const removeAvatar = () => {
+    if (window.confirm('عکس پروفایل حذف بشه؟')) {
+      setUserAvatar(null)
+      localStorage.removeItem('ebadat-user-avatar')
+      showToast('عکس حذف شد')
+    }
   }
 
   const toggleTheme = () => {
@@ -87,7 +134,7 @@ export default function Profile() {
     <main className="p-4 max-w-md mx-auto pb-24 animate-fade-in bg-mesh-light dark:bg-mesh-dark min-h-screen">
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full shadow-glow flex items-center gap-2 text-sm text-white ${
+        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-full shadow-glow flex items-center gap-2 text-sm text-white ${
           toast.type === 'error' ? 'bg-red-500' : 'bg-brand-500'
         }`}>
           {toast.type === 'error' ? <AlertCircle size={16} /> : <Check size={16} />}
@@ -98,23 +145,96 @@ export default function Profile() {
       {/* هدر پروفایل */}
       <div className="text-center mt-6 mb-6">
         <div className="relative inline-block">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-bl from-brand-400 via-brand-500 to-brand-700 flex items-center justify-center shadow-glow-lg">
-            <User className="text-white" size={44} />
-          </div>
-          <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-white dark:bg-dark-surface border-2 border-brand-500 flex items-center justify-center">
-            <div className="w-4 h-4 rounded-full bg-brand-500 animate-pulse" />
-          </div>
+          {/* آواتار */}
+          {userAvatar ? (
+            <img
+              src={userAvatar}
+              alt="آواتار"
+              className="w-28 h-28 rounded-full object-cover shadow-glow-lg border-4 border-white dark:border-dark-surface"
+            />
+          ) : (
+            <div className="w-28 h-28 rounded-full bg-gradient-to-bl from-brand-400 via-brand-500 to-brand-700 flex items-center justify-center shadow-glow-lg border-4 border-white dark:border-dark-surface">
+              <User className="text-white" size={48} />
+            </div>
+          )}
+
+          {/* دکمه دوربین */}
+          <button
+            onClick={() => avatarInputRef.current?.click()}
+            className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-brand-500 border-4 border-white dark:border-dark-surface flex items-center justify-center shadow-glow-sm active:scale-90 transition"
+            aria-label="تغییر عکس"
+          >
+            <Camera className="text-white" size={18} />
+          </button>
+
+          {/* دکمه حذف عکس */}
+          {userAvatar && (
+            <button
+              onClick={removeAvatar}
+              className="absolute bottom-0 left-0 w-8 h-8 rounded-full bg-red-500 border-2 border-white dark:border-dark-surface flex items-center justify-center shadow-md active:scale-90 transition"
+              aria-label="حذف عکس"
+            >
+              <Trash2 className="text-white" size={14} />
+            </button>
+          )}
+
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="hidden"
+          />
         </div>
-        <h1 className="text-2xl font-bold text-brand-600 dark:text-brand-400 mt-3">کاربر همراه</h1>
+
+        {/* نام کاربر */}
+        {editingName ? (
+          <div className="flex items-center gap-2 justify-center mt-4 px-4">
+            <input
+              type="text"
+              value={tempName}
+              onChange={(e) => setTempName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && saveName()}
+              className="flex-1 max-w-[200px] bg-white dark:bg-dark-surface border-2 border-brand-500 rounded-xl px-4 py-2 text-center text-main font-bold outline-none"
+              autoFocus
+              placeholder="اسمت رو بنویس"
+            />
+            <button
+              onClick={saveName}
+              className="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center active:scale-90 transition shadow-glow-sm"
+            >
+              <Save size={18} />
+            </button>
+            <button
+              onClick={() => { setEditingName(false); setTempName(userName) }}
+              className="w-10 h-10 rounded-xl bg-light-bg dark:bg-dark-bg text-sub flex items-center justify-center active:scale-90 transition"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <h1 className="text-2xl font-bold text-brand-600 dark:text-brand-400">
+              {userName}
+            </h1>
+            <button
+              onClick={() => { setEditingName(true); setTempName(userName) }}
+              className="w-8 h-8 rounded-full bg-light-bg dark:bg-dark-bg flex items-center justify-center active:scale-90 transition"
+              aria-label="ویرایش نام"
+            >
+              <Pencil size={14} className="text-sub" />
+            </button>
+          </div>
+        )}
+
         {title && (
-          <p className="text-sm text-sub mt-1 flex items-center justify-center gap-1">
+          <p className="text-sm text-sub mt-2 flex items-center justify-center gap-1">
             <span>{title.emoji}</span>
             <span className="font-bold">{title.name}</span>
             <span className="text-xs">·</span>
             <span className="text-xs">{xp.toLocaleString('fa-IR')} XP</span>
           </p>
         )}
-        <p className="text-xs text-sub mt-1">نسخه ۱.۰.۰</p>
       </div>
 
       {/* کارت دستاوردها */}
@@ -149,7 +269,7 @@ export default function Profile() {
             <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
               <Flame className="text-amber-500" size={20} />
             </div>
-            <p className="text-2xl font-bold text-main">{stats.streak || streak}</p>
+            <p className="text-2xl font-bold text-main">{streak}</p>
             <p className="text-xs text-sub mt-1">روز پیوسته</p>
           </div>
           <div className="card p-4 text-center">
@@ -192,10 +312,6 @@ export default function Profile() {
             <span className={`text-sm font-bold ${stats.totalQaza > 0 ? 'text-red-500' : 'text-brand-500'}`}>
               {stats.totalQaza}
             </span>
-          </div>
-          <div className="flex items-center justify-between py-2 border-b border-light-border dark:border-dark-border">
-            <span className="text-sm text-sub">چالش‌های انجام شده</span>
-            <span className="text-sm font-bold text-main">{stats.totalChallenges}</span>
           </div>
           <div className="flex items-center justify-between py-2">
             <span className="text-sm text-sub">شروع سفر معنوی</span>
@@ -290,7 +406,7 @@ export default function Profile() {
 
       {/* مودال تأیید ریست */}
       {showResetConfirm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6" onClick={() => setShowResetConfirm(false)}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6" onClick={() => setShowResetConfirm(false)}>
           <div className="bg-white dark:bg-dark-surface rounded-3xl p-6 max-w-sm w-full shadow-glow-lg animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
               <AlertCircle className="text-red-500" size={32} />
@@ -313,7 +429,7 @@ export default function Profile() {
 
       {/* مودال درباره */}
       {showAbout && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6" onClick={() => setShowAbout(false)}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6" onClick={() => setShowAbout(false)}>
           <div className="bg-white dark:bg-dark-surface rounded-3xl p-6 max-w-sm w-full shadow-glow-lg animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-main">درباره اپلیکیشن</h3>
