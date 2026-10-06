@@ -23,13 +23,13 @@ export default defineConfig({
         icons: [
           {
             src: 'icon.svg',
-            sizes: '192x192 512x512 any',
+            sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'any',
           },
           {
             src: 'icon.svg',
-            sizes: '192x192 512x512 any',
+            sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'maskable',
           },
@@ -37,7 +37,7 @@ export default defineConfig({
         categories: ['lifestyle', 'education'],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,ico,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,ico,woff2,mp3}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
