@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Capacitor } from '@capacitor/core'
+import { Geolocation } from '@capacitor/geolocation'
 import {
   MapPin, Navigation, Search, Check, ChevronLeft,
   Bell, BellOff, Volume2, VolumeX, Play, AlertCircle
@@ -12,7 +14,6 @@ const ADHANS = [
   { key: 'maghrib', name: 'اذان مغرب', icon: '🌆' },
 ]
 
-// فایل اذان داخل پروژه
 const ADHAN_SRC = '/Ebadat/sounds/adhan.mp3'
 
 export default function PrayerSettings() {
@@ -56,31 +57,69 @@ export default function PrayerSettings() {
     updateTimes(city)
   }
 
-  const handleGPS = () => {
-    if (!navigator.geolocation) {
-      setLocationError('مرورگر شما از GPS پشتیبانی نمی‌کنه')
-      return
-    }
+  // ✅ پیدا کردن نزدیک‌ترین شهر از مختصات
+  const findNearestCity = (latitude, longitude) => {
+    let nearest = cities[0]
+    let minDist = Infinity
+    cities.forEach(c => {
+      const d = Math.sqrt((c.lat - latitude) ** 2 + (c.lng - longitude) ** 2)
+      if (d < minDist) { minDist = d; nearest = c }
+    })
+    return nearest
+  }
+
+  // ✅ تابع اصلی GPS — هم برای Web هم برای APK
+  const handleGPS = async () => {
     setLocating(true)
     setLocationError('')
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords
-        let nearest = cities[0]
-        let minDist = Infinity
-        cities.forEach(c => {
-          const d = Math.sqrt((c.lat - latitude) ** 2 + (c.lng - longitude) ** 2)
-          if (d < minDist) { minDist = d; nearest = c }
+
+    try {
+      // توی APK از Capacitor استفاده کن
+      if (Capacitor.isNativePlatform()) {
+        // درخواست اجازه (پیام اندروید میاد)
+        const permission = await Geolocation.requestPermissions()
+        if (permission.location !== 'granted') {
+          setLocationError('برای استفاده از GPS، اجازه دسترسی لازمه')
+          setLocating(false)
+          return
+        }
+
+        // گرفتن موقعیت
+        const position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 15000,
         })
+
+        const nearest = findNearestCity(position.coords.latitude, position.coords.longitude)
         handleSelect(nearest)
         setLocating(false)
-      },
-      () => {
-        setLocationError('دسترسی به موقعیت داده نشد')
+        return
+      }
+
+      // توی Web (PWA) از API مرورگر
+      if (!navigator.geolocation) {
+        setLocationError('مرورگر شما از GPS پشتیبانی نمی‌کنه')
         setLocating(false)
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
+        return
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const nearest = findNearestCity(pos.coords.latitude, pos.coords.longitude)
+          handleSelect(nearest)
+          setLocating(false)
+        },
+        () => {
+          setLocationError('دسترسی به موقعیت داده نشد')
+          setLocating(false)
+        },
+        { enableHighAccuracy: true, timeout: 15000 }
+      )
+    } catch (err) {
+      console.error('GPS error:', err)
+      setLocationError('خطا در تشخیص موقعیت. دوباره امتحان کن.')
+      setLocating(false)
+    }
   }
 
   const saveAdhan = (newSettings) => {
@@ -109,7 +148,6 @@ export default function PrayerSettings() {
         setPreviewError('خطا در بارگذاری. یک بار دیگه امتحان کن.')
       }
       await audio.play()
-      // پخش نمونه فقط ۱۰ ثانیه
       setTimeout(() => {
         audio.pause()
         setPreviewing(false)
@@ -138,21 +176,11 @@ export default function PrayerSettings() {
       </div>
 
       <div className="mx-4 mb-4 bg-white dark:bg-dark-surface rounded-2xl p-1.5 flex gap-1.5 shadow-soft border border-light-border dark:border-dark-border">
-        <button
-          onClick={() => setTab('city')}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-            tab === 'city' ? 'bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-glow-sm' : 'text-sub'
-          }`}
-        >
+        <button onClick={() => setTab('city')} className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${tab === 'city' ? 'bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-glow-sm' : 'text-sub'}`}>
           <MapPin size={16} />
           شهر
         </button>
-        <button
-          onClick={() => setTab('adhan')}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-            tab === 'adhan' ? 'bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-glow-sm' : 'text-sub'
-          }`}
-        >
+        <button onClick={() => setTab('adhan')} className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${tab === 'adhan' ? 'bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-glow-sm' : 'text-sub'}`}>
           <Bell size={16} />
           اذان
         </button>
@@ -185,18 +213,12 @@ export default function PrayerSettings() {
                 {times.map((item, i) => {
                   const isAdhan = item.name.startsWith('اذان')
                   return (
-                    <div key={i} className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                      isAdhan ? 'bg-brand-50 dark:bg-brand-900/20' : 'bg-light-bg dark:bg-dark-bg opacity-60'
-                    }`}>
+                    <div key={i} className={`flex items-center justify-between rounded-lg px-3 py-2 ${isAdhan ? 'bg-brand-50 dark:bg-brand-900/20' : 'bg-light-bg dark:bg-dark-bg opacity-60'}`}>
                       <div className="flex items-center gap-2">
                         <span>{item.icon}</span>
-                        <span className={`text-sm ${isAdhan ? 'font-bold text-brand-700 dark:text-brand-300' : 'text-sub'}`}>
-                          {item.name}
-                        </span>
+                        <span className={`text-sm ${isAdhan ? 'font-bold text-brand-700 dark:text-brand-300' : 'text-sub'}`}>{item.name}</span>
                       </div>
-                      <span className={`text-sm font-mono ${isAdhan ? 'font-bold text-brand-600 dark:text-brand-400' : 'text-sub'}`}>
-                        {formatTime(item.time)}
-                      </span>
+                      <span className={`text-sm font-mono ${isAdhan ? 'font-bold text-brand-600 dark:text-brand-400' : 'text-sub'}`}>{formatTime(item.time)}</span>
                     </div>
                   )
                 })}
@@ -225,19 +247,13 @@ export default function PrayerSettings() {
                   <button
                     key={city.name}
                     onClick={() => handleSelect(city)}
-                    className={`w-full flex items-center justify-between px-4 py-3.5 text-right active:bg-brand-50 dark:active:bg-brand-900/20 transition ${
-                      i !== filtered.length - 1 ? 'border-b border-light-border dark:border-dark-border' : ''
-                    }`}
+                    className={`w-full flex items-center justify-between px-4 py-3.5 text-right active:bg-brand-50 dark:active:bg-brand-900/20 transition ${i !== filtered.length - 1 ? 'border-b border-light-border dark:border-dark-border' : ''}`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition ${
-                        isSelected ? 'bg-brand-500 text-white' : 'bg-light-bg dark:bg-dark-bg text-sub'
-                      }`}>
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition ${isSelected ? 'bg-brand-500 text-white' : 'bg-light-bg dark:bg-dark-bg text-sub'}`}>
                         <MapPin size={16} />
                       </div>
-                      <span className={`text-sm font-medium ${isSelected ? 'text-brand-600 dark:text-brand-400' : 'text-main'}`}>
-                        {city.name}
-                      </span>
+                      <span className={`text-sm font-medium ${isSelected ? 'text-brand-600 dark:text-brand-400' : 'text-main'}`}>{city.name}</span>
                     </div>
                     {isSelected && (
                       <div className="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center">
@@ -285,30 +301,18 @@ export default function PrayerSettings() {
                     </div>
                   </div>
                   {notifPermission === 'granted' ? (
-                    <div className="flex items-center gap-1 text-brand-500 text-xs font-bold">
-                      <Check size={16} /> فعال
-                    </div>
+                    <div className="flex items-center gap-1 text-brand-500 text-xs font-bold"><Check size={16} /> فعال</div>
                   ) : (
-                    <button onClick={requestNotification} className="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold active:scale-95 transition">
-                      فعال کن
-                    </button>
+                    <button onClick={requestNotification} className="bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold active:scale-95 transition">فعال کن</button>
                   )}
                 </div>
-                {notifPermission === 'denied' && (
-                  <p className="text-xs text-red-500 flex items-center gap-1 mt-2">
-                    <AlertCircle size={12} /> اعلان مسدود شده
-                  </p>
-                )}
+                {notifPermission === 'denied' && <p className="text-xs text-red-500 flex items-center gap-1 mt-2"><AlertCircle size={12} /> اعلان مسدود شده</p>}
               </div>
 
               <div className="card p-4 mb-4">
                 <p className="font-bold text-main text-sm mb-3">پیش‌نمایش اذان</p>
-                <button
-                  onClick={previewSound}
-                  disabled={previewing}
-                  className="w-full bg-gradient-to-l from-brand-500 to-brand-600 text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-50"
-                >
-                  {previewing ? 'در حال پخش... (۱۰ ثانیه)' : <><Play size={16} /> پخش نمونه اذان</>}
+                <button onClick={previewSound} disabled={previewing} className="w-full bg-gradient-to-l from-brand-500 to-brand-600 text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition disabled:opacity-50">
+                  {previewing ? 'در حال پخش...' : <><Play size={16} /> پخش نمونه اذان</>}
                 </button>
                 {previewError && <p className="text-xs text-red-500 text-center mt-2">⚠️ {previewError}</p>}
                 <p className="text-[10px] text-sub text-center mt-2">فقط ۱۰ ثانیه اول پخش می‌شه</p>
@@ -317,11 +321,7 @@ export default function PrayerSettings() {
               <div className="card p-4 mb-4">
                 <p className="font-bold text-main text-sm mb-3">کدوم اذان‌ها پخش بشه؟</p>
                 {ADHANS.map((a) => (
-                  <button
-                    key={a.key}
-                    onClick={() => toggleAdhan(a.key)}
-                    className="w-full flex items-center justify-between p-3 rounded-xl bg-light-bg dark:bg-dark-bg mb-2"
-                  >
+                  <button key={a.key} onClick={() => toggleAdhan(a.key)} className="w-full flex items-center justify-between p-3 rounded-xl bg-light-bg dark:bg-dark-bg mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{a.icon}</span>
                       <span className="text-sm font-medium text-main">{a.name}</span>
@@ -341,21 +341,7 @@ export default function PrayerSettings() {
                   </div>
                   <span className="text-sm font-bold text-brand-500">{Math.round(adhan.volume * 100)}%</span>
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={adhan.volume}
-                  onChange={(e) => saveAdhan({ ...adhan, volume: parseFloat(e.target.value) })}
-                  className="w-full accent-brand-500"
-                />
-              </div>
-
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl p-4">
-                <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
-                  💡 <strong>نکته:</strong> برای پخش دقیق اذان، اپ باید در حال اجرا باشه.
-                </p>
+                <input type="range" min="0" max="1" step="0.1" value={adhan.volume} onChange={(e) => saveAdhan({ ...adhan, volume: parseFloat(e.target.value) })} className="w-full accent-brand-500" />
               </div>
             </>
           )}
