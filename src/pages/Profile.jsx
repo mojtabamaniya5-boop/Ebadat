@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom'
 import {
   User, Moon, Sun, Download, Upload, Trash2, Info,
   Heart, Award, Flame, BookOpen, CheckCircle2, AlertCircle,
-  ChevronLeft, Shield, X, Check, Trophy, Camera, Pencil, Save
+  ChevronLeft, Shield, X, Check, Trophy, Camera, Pencil, Save,
+  GraduationCap, MessageCircle
 } from 'lucide-react'
 import { getGlobalStats, exportAllData, importAllData, resetAllData } from '../utils/storage'
 import { calculateTotalXP, getTitle, getStreak } from '../utils/achievements'
+import { openOnboardingAgain } from '../utils/onboarding'
 
 export default function Profile() {
   const [dark, setDark] = useState(false)
@@ -20,6 +22,7 @@ export default function Profile() {
   const [tempName, setTempName] = useState('')
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
+  const [showContact, setShowContact] = useState(false)
   const [toast, setToast] = useState(null)
   const fileInputRef = useRef(null)
   const avatarInputRef = useRef(null)
@@ -32,7 +35,6 @@ export default function Profile() {
     setTitle(getTitle(x))
     setStreak(getStreak())
 
-    // بارگذاری نام و عکس
     const savedName = localStorage.getItem('ebadat-user-name')
     const savedAvatar = localStorage.getItem('ebadat-user-avatar')
     if (savedName) { setUserName(savedName); setTempName(savedName) }
@@ -145,7 +147,6 @@ export default function Profile() {
       {/* هدر پروفایل */}
       <div className="text-center mt-6 mb-6">
         <div className="relative inline-block">
-          {/* آواتار */}
           {userAvatar ? (
             <img
               src={userAvatar}
@@ -158,7 +159,6 @@ export default function Profile() {
             </div>
           )}
 
-          {/* دکمه دوربین */}
           <button
             onClick={() => avatarInputRef.current?.click()}
             className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-brand-500 border-4 border-white dark:border-dark-surface flex items-center justify-center shadow-glow-sm active:scale-90 transition"
@@ -167,7 +167,6 @@ export default function Profile() {
             <Camera className="text-white" size={18} />
           </button>
 
-          {/* دکمه حذف عکس */}
           {userAvatar && (
             <button
               onClick={removeAvatar}
@@ -187,7 +186,6 @@ export default function Profile() {
           />
         </div>
 
-        {/* نام کاربر */}
         {editingName ? (
           <div className="flex items-center gap-2 justify-center mt-4 px-4">
             <input
@@ -320,9 +318,10 @@ export default function Profile() {
         </div>
       )}
 
-      {/* تم */}
+      {/* تنظیمات */}
+      <p className="text-xs font-bold text-sub mb-2 px-1">تنظیمات</p>
       <div className="card overflow-hidden mb-4">
-        <button onClick={toggleTheme} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition">
+        <button onClick={toggleTheme} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition border-b border-light-border dark:border-dark-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
               {dark ? <Moon className="text-amber-500" size={20} /> : <Sun className="text-amber-500" size={20} />}
@@ -336,56 +335,81 @@ export default function Profile() {
             <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${dark ? 'right-0.5' : 'left-0.5'}`} />
           </div>
         </button>
+
+        <button onClick={openOnboardingAgain} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center">
+              <GraduationCap className="text-brand-500" size={20} />
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-main text-sm">آموزش استفاده</p>
+              <p className="text-xs text-sub mt-0.5">دیدن دوباره راهنمای اپ</p>
+            </div>
+          </div>
+          <ChevronLeft className="text-sub" size={18} />
+        </button>
       </div>
 
       {/* مدیریت داده */}
-      <div className="mb-4">
-        <p className="text-xs font-bold text-sub mb-2 px-1">مدیریت داده‌ها</p>
-        <div className="card overflow-hidden">
-          <button onClick={handleExport} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition border-b border-light-border dark:border-dark-border">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center">
-                <Download className="text-brand-500" size={20} />
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-main text-sm">پشتیبان‌گیری</p>
-                <p className="text-xs text-sub mt-0.5">ذخیره داده‌ها در فایل</p>
-              </div>
+      <p className="text-xs font-bold text-sub mb-2 px-1">مدیریت داده‌ها</p>
+      <div className="card overflow-hidden mb-4">
+        <button onClick={handleExport} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition border-b border-light-border dark:border-dark-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center">
+              <Download className="text-brand-500" size={20} />
             </div>
-            <ChevronLeft className="text-sub" size={18} />
-          </button>
+            <div className="text-right">
+              <p className="font-bold text-main text-sm">پشتیبان‌گیری</p>
+              <p className="text-xs text-sub mt-0.5">ذخیره داده‌ها در فایل</p>
+            </div>
+          </div>
+          <ChevronLeft className="text-sub" size={18} />
+        </button>
 
-          <button onClick={() => fileInputRef.current?.click()} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition border-b border-light-border dark:border-dark-border">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center">
-                <Upload className="text-sky-500" size={20} />
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-main text-sm">بازیابی</p>
-                <p className="text-xs text-sub mt-0.5">بارگذاری از فایل</p>
-              </div>
+        <button onClick={() => fileInputRef.current?.click()} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition border-b border-light-border dark:border-dark-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center">
+              <Upload className="text-sky-500" size={20} />
             </div>
-            <ChevronLeft className="text-sub" size={18} />
-          </button>
-          <input ref={fileInputRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
+            <div className="text-right">
+              <p className="font-bold text-main text-sm">بازیابی</p>
+              <p className="text-xs text-sub mt-0.5">بارگذاری از فایل</p>
+            </div>
+          </div>
+          <ChevronLeft className="text-sub" size={18} />
+        </button>
+        <input ref={fileInputRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
 
-          <button onClick={() => setShowResetConfirm(true)} className="w-full p-4 flex items-center justify-between active:bg-red-50 dark:active:bg-red-900/20 transition">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-                <Trash2 className="text-red-500" size={20} />
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-red-500 text-sm">حذف همه داده‌ها</p>
-                <p className="text-xs text-sub mt-0.5">غیرقابل بازگشت</p>
-              </div>
+        <button onClick={() => setShowResetConfirm(true)} className="w-full p-4 flex items-center justify-between active:bg-red-50 dark:active:bg-red-900/20 transition">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+              <Trash2 className="text-red-500" size={20} />
             </div>
-            <ChevronLeft className="text-red-400" size={18} />
-          </button>
-        </div>
+            <div className="text-right">
+              <p className="font-bold text-red-500 text-sm">حذف همه داده‌ها</p>
+              <p className="text-xs text-sub mt-0.5">غیرقابل بازگشت</p>
+            </div>
+          </div>
+          <ChevronLeft className="text-red-400" size={18} />
+        </button>
       </div>
 
-      {/* درباره اپ */}
+      {/* پشتیبانی */}
+      <p className="text-xs font-bold text-sub mb-2 px-1">پشتیبانی</p>
       <div className="card overflow-hidden mb-4">
+        <button onClick={() => setShowContact(true)} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition border-b border-light-border dark:border-dark-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+              <MessageCircle className="text-emerald-500" size={20} />
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-main text-sm">ارتباط با ما</p>
+              <p className="text-xs text-sub mt-0.5">انتقاد، پیشنهاد، گزارش باگ</p>
+            </div>
+          </div>
+          <ChevronLeft className="text-sub" size={18} />
+        </button>
+
         <button onClick={() => setShowAbout(true)} className="w-full p-4 flex items-center justify-between active:bg-gray-50 dark:active:bg-slate-700 transition">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
@@ -393,7 +417,7 @@ export default function Profile() {
             </div>
             <div className="text-right">
               <p className="font-bold text-main text-sm">درباره اپلیکیشن</p>
-              <p className="text-xs text-sub mt-0.5">نسخه، سازنده، حریم خصوصی</p>
+              <p className="text-xs text-sub mt-0.5">نسخه، حریم خصوصی</p>
             </div>
           </div>
           <ChevronLeft className="text-sub" size={18} />
@@ -454,6 +478,61 @@ export default function Profile() {
               </p>
             </div>
             <p className="text-center text-xs text-sub">🇮🇷 ساخته شده در ایران</p>
+          </div>
+        </div>
+      )}
+
+      {/* مودال ارتباط با ما */}
+      {showContact && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6" onClick={() => setShowContact(false)}>
+          <div className="bg-white dark:bg-dark-surface rounded-t-3xl sm:rounded-3xl p-6 pb-28 sm:pb-6 max-w-sm w-full shadow-glow-lg animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="w-12 h-1.5 bg-gray-300 dark:bg-slate-600 rounded-full mx-auto mb-4 sm:hidden" />
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg font-bold text-main">ارتباط با ما</h3>
+              <button onClick={() => setShowContact(false)} className="w-8 h-8 rounded-full bg-light-bg dark:bg-dark-bg flex items-center justify-center">
+                <X size={16} className="text-sub" />
+              </button>
+            </div>
+
+            <p className="text-sm text-sub leading-relaxed text-center mb-5">
+              از نظرات، پیشنهادات و انتقادات شما استقبال می‌کنیم 💚
+            </p>
+
+            <div className="space-y-2">
+              <a
+                href="mailto:support@ebadat.app"
+                className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-l from-brand-500 to-brand-600 text-white shadow-glow-sm active:scale-95 transition"
+              >
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <MessageCircle size={20} />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-sm">ایمیل پشتیبانی</p>
+                  <p className="text-xs text-white/80 mt-0.5">support@ebadat.app</p>
+                </div>
+                <ChevronLeft size={20} className="text-white/70" />
+              </a>
+
+              <a
+                href="https://t.me/ebadat_app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-dark-bg border border-light-border dark:border-dark-border active:scale-95 transition"
+              >
+                <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center">
+                  <MessageCircle size={20} className="text-sky-500" />
+                </div>
+                <div className="flex-1 text-right">
+                  <p className="font-bold text-main text-sm">کانال تلگرام</p>
+                  <p className="text-xs text-sub mt-0.5">اخبار و آپدیت‌ها</p>
+                </div>
+                <ChevronLeft size={20} className="text-sub" />
+              </a>
+            </div>
+
+            <p className="text-[10px] text-sub text-center mt-5">
+              💡 هر انتقاد یا پیشنهادی که داری، خوشحال می‌شیم بشنویم
+            </p>
           </div>
         </div>
       )}
